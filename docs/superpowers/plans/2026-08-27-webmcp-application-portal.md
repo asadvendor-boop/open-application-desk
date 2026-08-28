@@ -499,7 +499,7 @@ git commit -m "feat: add deterministic application audits"
 - Consumes: all domain types, `patchChangeSchema`, and `AuditReport`.
 - Produces: `createWorkspace()`, `editDraftField()`, `setAttestation()`, `recordAudit()`, `stagePatch()`, `applyPatch()`, `rejectPatch()`, `prepareReview()`, `authorizeReview()`, `submitApproved()`, and `hashDraft()`.
 
-- [ ] **Step 1: Write failing authority-boundary tests**
+- [x] **Step 1: Write failing authority-boundary tests**
 
 ```ts
 it("stages a patch without changing the draft", () => {
@@ -551,13 +551,13 @@ it("submits once only after matching human authorization", async () => {
 });
 ```
 
-- [ ] **Step 2: Verify the workspace tests fail**
+- [x] **Step 2: Verify the workspace tests fail**
 
 Run: `npm test -- src/domain/application/canonical.test.ts src/domain/application/workspace.test.ts`
 
 Expected: FAIL because canonical and workspace functions are absent.
 
-- [ ] **Step 3: Implement canonical hashing**
+- [x] **Step 3: Implement canonical hashing**
 
 Canonicalize reviewable fields, evidence, attestation, draft ID, and revision.
 Sort evidence by ID and object keys lexicographically. Exclude `updatedAt` and
@@ -571,7 +571,7 @@ export async function hashDraft(draft: ApplicationDraft): Promise<string> {
 }
 ```
 
-- [ ] **Step 4: Implement revision and patch transitions**
+- [x] **Step 4: Implement revision and patch transitions**
 
 Every human field/evidence/attestation mutation increments the revision, returns
 the workflow to `draft`, clears audit/review/receipt, marks an older staged patch
@@ -580,7 +580,7 @@ rejects duplicate fields, and changes no application field. `applyPatch()`
 rejects stale patches, applies all allowlisted changes in one revision, and
 records one human activity. `rejectPatch()` changes only patch state.
 
-- [ ] **Step 5: Implement review and submission transitions**
+- [x] **Step 5: Implement review and submission transitions**
 
 `prepareReview()` rejects a stale/missing audit or any blocker, hashes the exact
 draft, and expires after five minutes. `authorizeReview()` is called only by the
@@ -588,13 +588,13 @@ native UI and rejects mismatch/expiry. `submitApproved()` verifies review ID,
 hash, authorization, expiry, and current draft hash; repeated identical calls
 return the original receipt.
 
-- [ ] **Step 6: Run invariant verification**
+- [x] **Step 6: Run invariant verification**
 
 Run: `npm test -- src/domain/application/canonical.test.ts src/domain/application/workspace.test.ts && npm test && npm run typecheck`
 
 Expected: all commands PASS.
 
-- [ ] **Step 7: Commit authority boundaries**
+- [x] **Step 7: Commit authority boundaries**
 
 ```bash
 git add src/domain/application
