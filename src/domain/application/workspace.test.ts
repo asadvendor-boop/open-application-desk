@@ -12,6 +12,7 @@ import {
   setAttestation,
   stagePatch,
   submitApproved,
+  upsertEvidence,
 } from "./workspace";
 
 const NOW = "2026-08-27T01:00:00.000Z";
@@ -137,6 +138,27 @@ describe("workspace authority boundaries", () => {
     expect(changed.draft.revision).toBe(audited.draft.revision + 1);
     expect(changed.audit).toBeNull();
     expect(changed.activity.at(-1)?.actor).toBe("human");
+  });
+
+  it("treats evidence changes as human-owned draft mutations", () => {
+    const audited = recordAudit(
+      createWorkspace(createValidDraft()),
+      passingAudit(),
+    );
+    const changed = upsertEvidence(
+      audited,
+      {
+        id: "repository-evidence",
+        claim: "The repository is public and licensed.",
+        url: "https://github.com/openai/openai-node",
+        kind: "repository",
+      },
+      LATER,
+    );
+
+    expect(changed.draft.evidence[0]?.claim).toContain("licensed");
+    expect(changed.draft.revision).toBe(audited.draft.revision + 1);
+    expect(changed.audit).toBeNull();
   });
 
   it("invalidates authorization when a reviewed draft changes", async () => {

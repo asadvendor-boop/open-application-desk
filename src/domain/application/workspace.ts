@@ -5,6 +5,7 @@ import type {
   ApplicationDraft,
   ApplicationFieldKey,
   AuditReport,
+  EvidenceBinding,
   StagedPatch,
   WorkspaceState,
 } from "./types";
@@ -131,6 +132,30 @@ export function setAttestation(
     { ...state.draft, attested },
     "attest",
     attested ? "Added applicant attestation." : "Removed applicant attestation.",
+    now,
+  );
+}
+
+export function upsertEvidence(
+  state: WorkspaceState,
+  evidence: EvidenceBinding,
+  now: string,
+): WorkspaceState {
+  const existingIndex = state.draft.evidence.findIndex(
+    (item) => item.id === evidence.id,
+  );
+  const nextEvidence = state.draft.evidence.map((item) => ({ ...item }));
+  if (existingIndex === -1) {
+    nextEvidence.push({ ...evidence });
+  } else {
+    nextEvidence[existingIndex] = { ...evidence };
+  }
+
+  return withHumanMutation(
+    state,
+    { ...state.draft, evidence: nextEvidence },
+    "edit_evidence",
+    "Updated a claim-to-evidence binding.",
     now,
   );
 }

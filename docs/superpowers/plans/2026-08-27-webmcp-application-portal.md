@@ -627,7 +627,7 @@ git commit -m "feat: bind review and submission authority"
 - Consumes: all pure workspace transitions and the GitHub metadata route.
 - Produces: `useApplicationWorkspace()`, a stable `WorkspaceController`, and a complete manual Draft -> Review -> Submitted experience.
 
-- [ ] **Step 1: Write failing persistence and manual-journey tests**
+- [x] **Step 1: Write failing persistence and manual-journey tests**
 
 ```ts
 it("rejects malformed or future-version browser state", () => {
@@ -647,8 +647,7 @@ it("reports a write failure instead of claiming persistence", () => {
 ```tsx
 it("shows a staged patch as a diff and requires the human Apply control", async () => {
   const user = userEvent.setup();
-  render(<ApplicationWorkspace />);
-  await user.click(screen.getByRole("button", { name: "Stage sample correction" }));
+  render(<PatchHarness />);
   expect(screen.getByText("Proposed change")).toBeInTheDocument();
   expect(screen.getByLabelText("Project summary")).not.toHaveValue("A concise verified summary.");
   await user.click(screen.getByRole("button", { name: "Apply proposed changes" }));
@@ -656,17 +655,16 @@ it("shows a staged patch as a diff and requires the human Apply control", async 
 });
 ```
 
-The `Stage sample correction` control exists only when
-`process.env.NODE_ENV !== "production"`; it tests the human review UI without
-appearing in the judge build.
+`PatchHarness` composes the real `PatchReviewDrawer` with the real pure workspace
+transition. No test-only control or environment branch is added to production.
 
-- [ ] **Step 2: Verify the focused tests fail**
+- [x] **Step 2: Verify the focused tests fail**
 
 Run: `npm test -- src/storage/local-workspace.test.ts src/components/application-workspace.test.tsx`
 
 Expected: FAIL because storage, hook, and components are absent.
 
-- [ ] **Step 3: Implement versioned local-first persistence**
+- [x] **Step 3: Implement versioned local-first persistence**
 
 Use key `webmcp-application-portal:v1`. Parse stored JSON with a strict
 `WorkspaceState` Zod schema. Return `null` for malformed, missing, or non-v1
@@ -679,7 +677,7 @@ For final submission, compute the next state, persist it, and update React state
 only when persistence succeeds. Persistence unavailable behavior is fail-visible:
 keep the review authorized, show the storage error, and issue no receipt.
 
-- [ ] **Step 4: Implement the stable workspace controller**
+- [x] **Step 4: Implement the stable workspace controller**
 
 Expose:
 
@@ -688,6 +686,7 @@ export interface WorkspaceController {
   getState(): WorkspaceState;
   editField(field: ApplicationFieldKey, value: string): void;
   setAttestation(value: boolean): void;
+  upsertEvidence(evidence: EvidenceBinding): void;
   runAudit(signal?: AbortSignal): Promise<AuditReport>;
   stagePatch(input: StagePatchInput): StagedPatch;
   applyPatch(patchId: string): void;
@@ -704,7 +703,7 @@ Keep latest state in a React ref so tool callbacks never capture stale renders.
 Inject `crypto.randomUUID()` and `new Date().toISOString()` at the hook boundary;
 pure functions remain deterministic.
 
-- [ ] **Step 5: Build the single-screen product**
+- [x] **Step 5: Build the single-screen product**
 
 Use a civic-editorial direction rather than a dark AI dashboard:
 
@@ -718,7 +717,7 @@ Implement all manual fields, evidence bindings, loading/error states, patch diff
 Apply/Reject, review expiry, authorization, receipt, and reset. Do not add
 navigation or a dashboard home.
 
-- [ ] **Step 6: Run component and build gates**
+- [x] **Step 6: Run component and build gates**
 
 Run: `npm test -- src/storage/local-workspace.test.ts src/components/application-workspace.test.tsx && npm run lint && npm run typecheck && npm run build`
 
