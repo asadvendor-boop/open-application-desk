@@ -13,12 +13,14 @@ const expectedTools = [
   "submit_approved_application",
 ];
 
-test("discovers exactly five WebMCP tools after load and reload", async ({ page }) => {
+test("discovers five core tools plus the one contextual fact request only while needed", async ({ page }) => {
   await installWebMcpTestDouble(page);
   await page.goto("/");
 
   await expect(page.getByText("WebMCP connected")).toBeVisible();
-  expect(await registeredToolNames(page)).toEqual(expectedTools);
+  expect((await registeredToolNames(page)).sort()).toEqual(
+    [...expectedTools, "request_applicant_fact"].sort(),
+  );
 
   const schemasAreClosed = await page.evaluate(() =>
     [...window.__registeredWebMcpTools.values()].every(
@@ -28,6 +30,19 @@ test("discovers exactly five WebMCP tools after load and reload", async ({ page 
     ),
   );
   expect(schemasAreClosed).toBe(true);
+
+  const pendingFact = page.evaluate(async () => {
+    const tool = window.__registeredWebMcpTools.get("request_applicant_fact");
+    if (!tool) throw new Error("Missing contextual tool");
+    return tool.execute(
+      { field: "audienceProblem" },
+      { signal: new AbortController().signal },
+    );
+  });
+  await page.getByLabel("Your answer").fill("Applicants need a truthful shared draft.");
+  await page.getByRole("button", { name: "Share answer with ChatGPT" }).click();
+  await pendingFact;
+  await expect.poll(() => registeredToolNames(page)).toEqual(expectedTools);
 
   await page.reload();
   await expect(page.getByText("WebMCP connected")).toBeVisible();

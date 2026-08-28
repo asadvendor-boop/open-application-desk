@@ -19,6 +19,39 @@ const fieldLabels: Record<keyof ApplicationDraft["fields"], string> = {
   impactStatement: "Impact statement",
 };
 
+function ReadinessRow({
+  label,
+  accessibleLabel,
+  readyCount,
+  requirementCount,
+}: {
+  label: string;
+  accessibleLabel: string;
+  readyCount: number;
+  requirementCount: number;
+}) {
+  return (
+    <div className="patch-readiness-row">
+      <span>{label}</span>
+      <div
+        className="patch-readiness-row__segments"
+        aria-label={accessibleLabel}
+      >
+        {Array.from({ length: requirementCount }, (_, index) => (
+          <span
+            className={index < readyCount ? "is-ready" : "is-blocked"}
+            key={index}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function countWord(value: number): string {
+  return ["Zero", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten"][value] ?? String(value);
+}
+
 export function PatchReviewDrawer({
   patch,
   fields,
@@ -39,6 +72,31 @@ export function PatchReviewDrawer({
         </div>
         <span className="revision-chip">Based on r{patch.baseRevision}</span>
       </div>
+
+      {patch.readinessProjection ? (
+        <section className="patch-readiness-preview" aria-label="Patch readiness preview">
+          <p>Preview only — not applied</p>
+          <ReadinessRow
+            label={`Now: ${patch.readinessProjection.currentReadyCount}/${patch.readinessProjection.requirementCount} ready`}
+            accessibleLabel={`Now: ${patch.readinessProjection.currentReadyCount} of ${patch.readinessProjection.requirementCount} ready`}
+            readyCount={patch.readinessProjection.currentReadyCount}
+            requirementCount={patch.readinessProjection.requirementCount}
+          />
+          <ReadinessRow
+            label={`After this proposal: ${patch.readinessProjection.projectedReadyCount}/${patch.readinessProjection.requirementCount} ready`}
+            accessibleLabel={`After this proposal: ${patch.readinessProjection.projectedReadyCount} of ${patch.readinessProjection.requirementCount} ready`}
+            readyCount={patch.readinessProjection.projectedReadyCount}
+            requirementCount={patch.readinessProjection.requirementCount}
+          />
+          <strong>
+            {countWord(patch.readinessProjection.resolvedRequirementIds.length)} blocker{patch.readinessProjection.resolvedRequirementIds.length === 1 ? "" : "s"} resolved · {countWord(patch.readinessProjection.remainingBlockingRequirementIds.length)} require{patch.readinessProjection.remainingBlockingRequirementIds.length === 1 ? "s" : ""} the applicant
+          </strong>
+        </section>
+      ) : (
+        <p className="patch-readiness-preview patch-readiness-preview--unavailable">
+          Projected readiness is unavailable until public repository metadata can be verified.
+        </p>
+      )}
 
       <div className="patch-diff-list">
         {patch.changes.map((change) => (

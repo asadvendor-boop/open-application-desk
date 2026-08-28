@@ -6,6 +6,8 @@ import type {
   ApplicationFieldKey,
   AuditReport,
   EvidenceBinding,
+  PatchChange,
+  PatchReadinessProjection,
   StagedPatch,
   WorkspaceState,
 } from "./types";
@@ -30,6 +32,44 @@ function activity(
 
 function stalePatch(patch: StagedPatch | null): StagedPatch | null {
   return patch?.state === "staged" ? { ...patch, state: "stale" } : patch;
+}
+
+export function applyPatchChangesToDraft(
+  draft: ApplicationDraft,
+  changes: PatchChange[],
+): ApplicationDraft {
+  const fields = { ...draft.fields };
+  for (const change of changes) {
+    fields[change.field] = change.value;
+  }
+  return { ...draft, fields };
+}
+
+export function createReadinessProjection(
+  current: AuditReport,
+  projected: AuditReport,
+): PatchReadinessProjection {
+  const currentChecks = new Map(
+    current.checks.map((check) => [check.requirementId, check]),
+  );
+  return {
+    currentReadyCount: current.checks.filter((check) => check.status === "pass")
+      .length,
+    projectedReadyCount: projected.checks.filter(
+      (check) => check.status === "pass",
+    ).length,
+    requirementCount: projected.checks.length,
+    resolvedRequirementIds: projected.checks
+      .filter(
+        (check) =>
+          check.status === "pass" &&
+          currentChecks.get(check.requirementId)?.status !== "pass",
+      )
+      .map((check) => check.requirementId),
+    remainingBlockingRequirementIds: projected.checks
+      .filter((check) => check.status === "block")
+      .map((check) => check.requirementId),
+  };
 }
 
 function withHumanMutation(
@@ -173,6 +213,7 @@ export function stagePatch(
   input: StagePatchInput,
   patchId: string,
   now: string,
+  readinessProjection?: PatchReadinessProjection,
 ): WorkspaceState {
   if (state.receipt || state.draft.workflowState === "submitted") {
     throw new Error("The application was already submitted.");
@@ -189,6 +230,7 @@ export function stagePatch(
     changes: parsed.changes,
     state: "staged",
     createdAt: now,
+    ...(readinessProjection ? { readinessProjection } : {}),
   };
 
   return {

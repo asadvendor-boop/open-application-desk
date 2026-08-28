@@ -6,9 +6,15 @@ import { WebMcpStatus } from "@/components/webmcp-status";
 import { createWorkspaceControllerHarness } from "@/test/fixtures";
 import { useWebMcpTools } from "./use-webmcp-tools";
 
-function HookHarness() {
+function HookHarness({ contextualFactRequestAvailable = false }: {
+  contextualFactRequestAvailable?: boolean;
+}) {
   const controller = useMemo(() => createWorkspaceControllerHarness(), []);
-  const connection = useWebMcpTools(controller);
+  const connection = useWebMcpTools(
+    controller,
+    undefined,
+    contextualFactRequestAvailable,
+  );
   return <WebMcpStatus connection={connection} />;
 }
 
@@ -43,6 +49,26 @@ afterEach(() => {
 });
 
 describe("useWebMcpTools", () => {
+  it("adds and removes the contextual fact tool without restarting the five core tools", async () => {
+    const { tools } = installModelContext();
+    const rendered = render(<HookHarness />);
+    await waitFor(() => expect(tools.size).toBe(5));
+
+    rendered.rerender(<HookHarness contextualFactRequestAvailable />);
+    await waitFor(() => expect(tools.has("request_applicant_fact")).toBe(true));
+    expect([...tools.keys()].slice(0, 5)).toEqual([
+      "get_application_context",
+      "audit_application",
+      "stage_draft_patch",
+      "prepare_submission",
+      "submit_approved_application",
+    ]);
+
+    rendered.rerender(<HookHarness contextualFactRequestAvailable={false} />);
+    await waitFor(() => expect(tools.has("request_applicant_fact")).toBe(false));
+    expect(tools.size).toBe(5);
+  });
+
   it("shows connected only after exactly five tools register and cleans up", async () => {
     const { tools } = installModelContext();
     const rendered = render(

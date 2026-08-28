@@ -4,7 +4,10 @@ import { useEffect, useState } from "react";
 
 import type { AuditReport } from "@/domain/application/types";
 import type { WorkspaceController } from "./use-application-workspace";
-import { registerWebMcpTools } from "@/webmcp/register-tools";
+import {
+  registerApplicantFactTool,
+  registerWebMcpTools,
+} from "@/webmcp/register-tools";
 
 export type WebMcpConnection =
   | { status: "unavailable" }
@@ -21,6 +24,7 @@ function initialConnection(): WebMcpConnection {
 export function useWebMcpTools(
   controller: WorkspaceController,
   onAuditCompleted?: (report: AuditReport) => void,
+  contextualFactRequestAvailable = false,
 ): WebMcpConnection {
   const [connection, setConnection] =
     useState<WebMcpConnection>(initialConnection);
@@ -56,6 +60,36 @@ export function useWebMcpTools(
       disposeRegistration?.();
     };
   }, [controller, onAuditCompleted]);
+
+  useEffect(() => {
+    if (!contextualFactRequestAvailable) {
+      return;
+    }
+    const modelContext = document.modelContext;
+    if (!modelContext || typeof modelContext.registerTool !== "function") {
+      return;
+    }
+    const lifecycle = new AbortController();
+    let disposeRegistration: (() => void) | undefined;
+
+    void registerApplicantFactTool(controller, modelContext, lifecycle.signal)
+      .then((registration) => {
+        if (lifecycle.signal.aborted) {
+          registration.dispose();
+          return;
+        }
+        disposeRegistration = registration.dispose;
+      })
+      .catch(() => {
+        // The core five-tool connection remains useful if this contextual
+        // convenience capability cannot be registered.
+      });
+
+    return () => {
+      lifecycle.abort();
+      disposeRegistration?.();
+    };
+  }, [controller, contextualFactRequestAvailable]);
 
   return connection;
 }

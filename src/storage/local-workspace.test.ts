@@ -1,6 +1,10 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { createWorkspace, recordAudit } from "@/domain/application/workspace";
+import {
+  createWorkspace,
+  recordAudit,
+  stagePatch,
+} from "@/domain/application/workspace";
 import { createValidDraft, passingAudit } from "@/test/fixtures";
 import {
   STORAGE_KEY,
@@ -14,6 +18,36 @@ describe("browser-local workspace persistence", () => {
 
     expect(saveWorkspace(workspace)).toEqual({ ok: true });
     expect(loadWorkspace()).toEqual(workspace);
+  });
+
+  it("persists a staged patch that includes a readiness projection", () => {
+    const workspace = stagePatch(
+      createWorkspace(createValidDraft()),
+      {
+        changes: [
+          {
+            field: "summary",
+            value: "A concise summary.",
+            rationale: "Meet the word limit.",
+          },
+        ],
+      },
+      "patch-1",
+      "2026-08-29T00:00:00.000Z",
+      {
+        currentReadyCount: 3,
+        projectedReadyCount: 7,
+        requirementCount: 10,
+        resolvedRequirementIds: ["summary_word_limit"],
+        remainingBlockingRequirementIds: ["audience_problem"],
+      },
+    );
+
+    expect(saveWorkspace(workspace)).toEqual({ ok: true });
+    expect(loadWorkspace()?.stagedPatch?.readinessProjection).toMatchObject({
+      currentReadyCount: 3,
+      projectedReadyCount: 7,
+    });
   });
 
   it("marks an older audited version-one state as having no trustworthy baseline", () => {

@@ -32,9 +32,11 @@ or unintended submission can cost an opportunity.
 
 WebMCP exposes the smallest useful set of structured actions from the actual
 page. Instead of asking an agent to interpret arbitrary UI text and imitate
-clicks, the portal gives it five clear tools: read the current context, run a
+clicks, the portal gives it five core tools: read the current context, run a
 deterministic audit, stage a bounded patch, prepare an exact review, and submit
-only an already-approved review.
+only an already-approved review. When the audience fact is blank, one
+contextual tool can request that exact fact—but the page owns the question and
+the applicant must choose to share the answer.
 
 The human UI and WebMCP tools call the same controller and domain functions.
 That means the agent sees the same draft and requirements as the applicant,
@@ -74,9 +76,10 @@ bound to the reviewed hash.
 
 The agent handles structured inspection and preparation: it reads the rules,
 finds deterministic blockers, proposes a visible allowlisted patch, and
-prepares a review. The person supplies facts the agent cannot truthfully infer,
-chooses whether to apply a proposal, attests to their application, and
-authorizes the reviewed artifact.
+prepares a review. It can visibly pause for the one applicant-owned audience
+fact instead of inventing it. The person supplies that fact, chooses whether to
+apply a proposal, attests to their application, and authorizes the reviewed
+artifact.
 
 That division makes collaborative submission work more legible than detached
 chat or brittle UI automation: the agent can help across the complete journey,
@@ -85,10 +88,12 @@ while a person retains factual and consequential authority at every boundary.
 ### Demonstrated impact
 
 The reference journey starts at **3/10 ready with seven blocking requirements**.
-The WebMCP audit changes zero application fields. After one staged proposal and
-the applicant's own factual inputs, the exact revision reaches **10/10 ready
-with zero blockers**. The final receipt records that before/after result and the
-reviewed SHA-256 draft hash.
+The WebMCP audit changes zero application fields. The page evaluates the staged
+proposal against an in-memory candidate and visibly projects **3/10 → 7/10**;
+the live draft remains unchanged until native Apply. After the applicant's own
+factual inputs, the exact revision reaches **10/10 ready with zero blockers**.
+The final receipt records that before/after result and the reviewed SHA-256
+draft hash.
 
 Those figures are produced by the visible deployed journey and its automated
 browser test. They are not estimates of time saved, claims of external adoption,
@@ -96,14 +101,16 @@ or promises that an application will be accepted.
 
 ### How it works
 
-The project registers five imperative WebMCP tools through
+The project registers five core imperative WebMCP tools through
 `document.modelContext.registerTool(...)`. Inputs are constrained with closed
 JSON Schema (`additionalProperties: false`) and runtime Zod validation. Tool
 registration uses an `AbortSignal` lifecycle; execution respects cancellation.
-The audit engine is deterministic and tool-proposed edits stay visibly staged
-until a person applies them. The hash-bound receipt uses a browser-provided
-exclusive lock, so repeated submissions of the same authorized review reconcile
-to one receipt across open tabs; a browser without that lock fails closed.
+One contextual `request_applicant_fact` registration appears only while its
+fixed audience fact is missing. The audit engine is deterministic and
+tool-proposed edits stay visibly staged until a person applies them. The
+hash-bound receipt uses a browser-provided exclusive lock, so repeated
+submissions of the same authorized review reconcile to one receipt across open
+tabs; a browser without that lock fails closed.
 
 The implementation is React, TypeScript, Vinext, Zod, Playwright, and
 `webmcp-types`. The exact registration path is

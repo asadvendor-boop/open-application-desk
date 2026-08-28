@@ -10,6 +10,7 @@ import {
 import type { SubmissionReceipt } from "@/domain/application/types";
 import { loadWorkspace, saveWorkspace } from "@/storage/local-workspace";
 import { createValidDraft, passingAudit } from "@/test/fixtures";
+import { createSampleDraft } from "@/domain/application/sample-program";
 import { useApplicationWorkspace } from "./use-application-workspace";
 
 function bufferFromHex(value: string): ArrayBuffer {
@@ -50,6 +51,100 @@ afterEach(() => {
 });
 
 describe("useApplicationWorkspace concurrency", () => {
+  it("stages a truthful readiness projection without mutating the live draft", async () => {
+    saveWorkspace(createWorkspace(createSampleDraft()));
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        new Response(JSON.stringify({
+          status: "verified",
+          repositoryUrl: "https://github.com/openai/openai-node",
+          isPublic: true,
+          licenseSpdx: "Apache-2.0",
+          checkedAt: "2026-08-29T00:00:00.000Z",
+          message: "Public repository and license verified.",
+        }), { headers: { "Content-Type": "application/json" } }),
+      ),
+    );
+    const { result } = renderHook(() => useApplicationWorkspace());
+    const originalSummary = result.current.workspace.draft.fields.summary;
+    const originalRevision = result.current.workspace.draft.revision;
+
+    let staged!: Awaited<ReturnType<typeof result.current.controller.stagePatch>>;
+    await act(async () => {
+      staged = await result.current.controller.stagePatch({
+        changes: [
+          {
+            field: "summary",
+            value: "A concise WebMCP application desk keeps applicant facts and final authorization human-owned.",
+            rationale: "Meet the word limit.",
+          },
+          {
+            field: "liveUrl",
+            value: "https://open-application-desk.example",
+            rationale: "Add the live project URL.",
+          },
+          {
+            field: "repositoryUrl",
+            value: "https://github.com/openai/openai-node",
+            rationale: "Add the public repository.",
+          },
+        ],
+      });
+    });
+
+    expect(result.current.workspace.draft.revision).toBe(originalRevision);
+    expect(result.current.workspace.draft.fields.summary).toBe(originalSummary);
+    expect(staged.readinessProjection).toMatchObject({
+      currentReadyCount: 3,
+      projectedReadyCount: 7,
+      requirementCount: 10,
+    });
+  });
+
+  it("does not claim a projected readiness score when proposed repository metadata is unverified", async () => {
+    saveWorkspace(createWorkspace(createSampleDraft()));
+    vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("offline")));
+    const { result } = renderHook(() => useApplicationWorkspace());
+
+    let staged!: Awaited<ReturnType<typeof result.current.controller.stagePatch>>;
+    await act(async () => {
+      staged = await result.current.controller.stagePatch({
+        changes: [
+          {
+            field: "repositoryUrl",
+            value: "https://github.com/openai/openai-node",
+            rationale: "Add the public repository.",
+          },
+        ],
+      });
+    });
+
+    expect(staged.readinessProjection).toBeUndefined();
+    expect(result.current.workspace.draft.fields.repositoryUrl).toBe("");
+  });
+
+  it("cancels a waiting applicant-fact request when the sample is reset", async () => {
+    saveWorkspace(createWorkspace(createSampleDraft()));
+    const { result } = renderHook(() => useApplicationWorkspace());
+
+    let pending!: ReturnType<typeof result.current.controller.requestApplicantFact>;
+    act(() => {
+      pending = result.current.controller.requestApplicantFact("audienceProblem");
+    });
+    expect(result.current.pendingApplicantFact?.field).toBe("audienceProblem");
+
+    act(() => {
+      result.current.controller.reset();
+    });
+
+    await expect(pending).resolves.toEqual({
+      outcome: "cancelled",
+      field: "audienceProblem",
+    });
+    expect(result.current.pendingApplicantFact).toBeNull();
+  });
+
   it("preserves a human edit made while a review hash is being prepared", async () => {
     saveWorkspace(recordAudit(createWorkspace(createValidDraft()), passingAudit()));
     let resolveDigest!: (value: ArrayBuffer) => void;

@@ -69,6 +69,16 @@ const patchSchema = z
     ),
     state: z.enum(["staged", "applied", "rejected", "stale"]),
     createdAt: z.string(),
+    readinessProjection: z
+      .object({
+        currentReadyCount: z.number().int().nonnegative(),
+        projectedReadyCount: z.number().int().nonnegative(),
+        requirementCount: z.number().int().positive(),
+        resolvedRequirementIds: z.array(z.string()),
+        remainingBlockingRequirementIds: z.array(z.string()),
+      })
+      .strict()
+      .optional(),
   })
   .strict();
 

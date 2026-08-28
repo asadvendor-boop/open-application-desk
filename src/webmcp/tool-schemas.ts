@@ -51,6 +51,10 @@ export const submitApprovedApplicationInputSchema = z
   })
   .strict();
 
+export const requestApplicantFactInputSchema = z
+  .object({ field: z.literal("audienceProblem") })
+  .strict();
+
 const fieldNames = [
   "projectName",
   "summary",
@@ -124,6 +128,14 @@ export const toolInputSchemas = {
       draftHash: { type: "string", pattern: "^[a-f0-9]{64}$" },
     },
     required: ["reviewId", "draftHash"],
+    additionalProperties: false,
+  },
+  request_applicant_fact: {
+    type: "object",
+    properties: {
+      field: { type: "string", const: "audienceProblem" },
+    },
+    required: ["field"],
     additionalProperties: false,
   },
 } as const;

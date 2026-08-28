@@ -8,6 +8,7 @@ import {
   contextSections,
   getApplicationContextInputSchema,
   prepareSubmissionInputSchema,
+  requestApplicantFactInputSchema,
   stagePatchInputSchema,
   submitApprovedApplicationInputSchema,
   toolInputSchemas,
@@ -173,7 +174,7 @@ export function createToolDefinitions(
           input,
           "stage_draft_patch",
         );
-        const patch = controller.stagePatch(parsed);
+        const patch = await controller.stagePatch(parsed, execution?.signal);
         throwIfAborted(execution);
         return {
           outcome: "staged",
@@ -259,4 +260,26 @@ export function createToolDefinitions(
       },
     },
   ];
+}
+
+export function createApplicantFactToolDefinition(
+  controller: WorkspaceController,
+): WebMCP.ModelContextTool {
+  return {
+    name: "request_applicant_fact",
+    title: "Request an applicant-owned fact",
+    description:
+      "Ask the page to collect the missing audience-and-problem fact from the applicant. The page owns the exact question and the applicant decides whether to share the answer. This tool cannot write any other field or apply a proposal.",
+    inputSchema: toolInputSchemas.request_applicant_fact,
+    annotations: { readOnlyHint: false, untrustedContentHint: true },
+    async execute(input, execution?) {
+      throwIfAborted(execution);
+      const parsed = parseInput(
+        requestApplicantFactInputSchema,
+        input,
+        "request_applicant_fact",
+      );
+      return controller.requestApplicantFact(parsed.field, execution?.signal);
+    },
+  };
 }

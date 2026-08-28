@@ -64,12 +64,21 @@ export interface PatchChange {
   rationale: string;
 }
 
+export interface PatchReadinessProjection {
+  currentReadyCount: number;
+  projectedReadyCount: number;
+  requirementCount: number;
+  resolvedRequirementIds: string[];
+  remainingBlockingRequirementIds: string[];
+}
+
 export interface StagedPatch {
   id: string;
   baseRevision: number;
   changes: PatchChange[];
   state: "staged" | "applied" | "rejected" | "stale";
   createdAt: string;
+  readinessProjection?: PatchReadinessProjection;
 }
 
 export interface ReviewSnapshot {

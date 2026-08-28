@@ -1,9 +1,13 @@
 import { describe, expect, it } from "vitest";
 
-import { createValidDraft, passingAudit } from "@/test/fixtures";
+import { auditApplication } from "@/domain/application/audit";
+import { createSampleDraft } from "@/domain/application/sample-program";
+import { createValidDraft, passingAudit, verifiedRepository } from "@/test/fixtures";
 import {
+  applyPatchChangesToDraft,
   applyPatch,
   authorizeReview,
+  createReadinessProjection,
   createWorkspace,
   editDraftField,
   prepareReview,
@@ -31,6 +35,52 @@ async function submittedWorkspace() {
 }
 
 describe("workspace authority boundaries", () => {
+  it("projects a staged patch without changing the live draft", () => {
+    const draft = createSampleDraft(NOW);
+    const changes = [
+      {
+        field: "summary" as const,
+        value: "A concise WebMCP application desk keeps applicant facts and final authorization human-owned.",
+        rationale: "Meet the program word limit.",
+      },
+      {
+        field: "liveUrl" as const,
+        value: "https://open-application-desk.example",
+        rationale: "Add the live project URL.",
+      },
+      {
+        field: "repositoryUrl" as const,
+        value: "https://github.com/openai/openai-node",
+        rationale: "Add the public source repository.",
+      },
+    ];
+    const currentAudit = auditApplication(draft, null, NOW);
+    const candidate = applyPatchChangesToDraft(draft, changes);
+    const projectedAudit = auditApplication(candidate, verifiedRepository, LATER);
+
+    const projection = createReadinessProjection(currentAudit, projectedAudit);
+
+    expect(draft.fields.summary).not.toBe(candidate.fields.summary);
+    expect(draft.fields.repositoryUrl).toBe("");
+    expect(candidate.revision).toBe(draft.revision);
+    expect(projection).toMatchObject({
+      currentReadyCount: 3,
+      projectedReadyCount: 7,
+      requirementCount: 10,
+      resolvedRequirementIds: [
+        "summary_word_limit",
+        "live_url_https",
+        "repository_public",
+        "repository_license",
+      ],
+      remainingBlockingRequirementIds: [
+        "audience_problem",
+        "claim_evidence",
+        "human_attestation",
+      ],
+    });
+  });
+
   it("stages a patch without changing the draft", () => {
     const original = createWorkspace(createValidDraft());
     const staged = stagePatch(

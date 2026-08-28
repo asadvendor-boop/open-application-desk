@@ -14,7 +14,9 @@ import type {
 } from "@/domain/application/types";
 import {
   applyPatch,
+  applyPatchChangesToDraft,
   authorizeReview,
+  createReadinessProjection,
   createWorkspace,
   editDraftField,
   prepareReview,
@@ -25,7 +27,10 @@ import {
   submitApproved,
   upsertEvidence,
 } from "@/domain/application/workspace";
-import type { WorkspaceController } from "@/hooks/use-application-workspace";
+import type {
+  ApplicantFactResult,
+  WorkspaceController,
+} from "@/hooks/use-application-workspace";
 
 export const verifiedRepository: RepositoryVerification = {
   status: "verified",
@@ -92,6 +97,9 @@ export function createWorkspaceControllerHarness(
 ): WorkspaceControllerHarness {
   let state = createWorkspace(initialDraft);
   let sequence = 0;
+  let pendingApplicantFact:
+    | { resolve: (result: ApplicantFactResult) => void }
+    | null = null;
 
   const nextNow = () =>
     new Date(Date.parse("2026-08-27T01:00:00.000Z") + sequence++ * 1_000)
@@ -122,9 +130,58 @@ export function createWorkspaceControllerHarness(
       commit(recordAudit(state, report));
       return report;
     },
-    stagePatch(input: StagePatchInput): StagedPatch {
-      commit(stagePatch(state, input, nextId("patch"), nextNow()));
+    async stagePatch(input: StagePatchInput): Promise<StagedPatch> {
+      const currentAudit = auditApplication(state.draft, repository, nextNow());
+      const candidateAudit = auditApplication(
+        applyPatchChangesToDraft(state.draft, input.changes),
+        repository,
+        nextNow(),
+      );
+      commit(
+        stagePatch(
+          state,
+          input,
+          nextId("patch"),
+          nextNow(),
+          createReadinessProjection(currentAudit, candidateAudit),
+        ),
+      );
       return state.stagedPatch!;
+    },
+    hasMissingApplicantFact() {
+      return !state.draft.fields.audienceProblem.trim();
+    },
+    async requestApplicantFact(field) {
+      if (field !== "audienceProblem" || state.draft.fields.audienceProblem.trim()) {
+        return { outcome: "not_needed", field: "audienceProblem" } as const;
+      }
+      if (pendingApplicantFact) {
+        return { outcome: "already_pending", field: "audienceProblem" } as const;
+      }
+      return new Promise((resolve) => {
+        pendingApplicantFact = { resolve };
+      });
+    },
+    answerApplicantFact(value) {
+      const answer = value.trim();
+      if (!pendingApplicantFact || !answer) {
+        throw new Error("A non-empty answer is required for the active applicant request.");
+      }
+      const pending = pendingApplicantFact;
+      pendingApplicantFact = null;
+      commit(editDraftField(state, "audienceProblem", answer, nextNow()));
+      pending.resolve({
+        outcome: "answered",
+        field: "audienceProblem",
+        source: "human",
+        value: answer,
+        draftRevision: state.draft.revision,
+      });
+    },
+    cancelApplicantFact() {
+      const pending = pendingApplicantFact;
+      pendingApplicantFact = null;
+      pending?.resolve({ outcome: "cancelled", field: "audienceProblem" });
     },
     applyPatch(patchId: string) {
       commit(applyPatch(state, patchId, nextNow()));
@@ -173,6 +230,9 @@ export function createWorkspaceControllerHarness(
       };
     },
     reset() {
+      const pending = pendingApplicantFact;
+      pendingApplicantFact = null;
+      pending?.resolve({ outcome: "cancelled", field: "audienceProblem" });
       state = createWorkspace(initialDraft);
     },
   };

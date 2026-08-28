@@ -5,7 +5,10 @@ import {
   createValidDraft,
   createWorkspaceControllerHarness,
 } from "@/test/fixtures";
-import { createToolDefinitions } from "./tool-executors";
+import {
+  createApplicantFactToolDefinition,
+  createToolDefinitions,
+} from "./tool-executors";
 
 function toolNamed(
   name: string,
@@ -32,6 +35,30 @@ async function executeWithoutBrowserContext(
 }
 
 describe("WebMCP tool executors", () => {
+  it("waits for the applicant-owned fact and returns only the human response", async () => {
+    const controller = createWorkspaceControllerHarness(createValidDraft());
+    controller.editField("audienceProblem", "");
+    const tool = createApplicantFactToolDefinition(controller);
+
+    const pending = tool.execute(
+      { field: "audienceProblem" },
+      { signal: liveSignal() },
+    );
+    controller.answerApplicantFact(
+      "Independent applicants need one truthful view of requirements and evidence.",
+    );
+
+    await expect(pending).resolves.toMatchObject({
+      outcome: "answered",
+      field: "audienceProblem",
+      source: "human",
+      draftRevision: 5,
+    });
+    expect(controller.getState().draft.fields.audienceProblem).toContain(
+      "Independent applicants",
+    );
+  });
+
   it("runs the complete tool path when a native browser omits execution context", async () => {
     const controller = createWorkspaceControllerHarness(createValidDraft());
     const tools = createToolDefinitions(controller);

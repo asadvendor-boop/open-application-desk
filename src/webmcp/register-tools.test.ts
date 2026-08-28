@@ -1,9 +1,31 @@
 import { describe, expect, it, vi } from "vitest";
 
 import { createWorkspaceControllerHarness } from "@/test/fixtures";
-import { registerWebMcpTools } from "./register-tools";
+import {
+  registerApplicantFactTool,
+  registerWebMcpTools,
+} from "./register-tools";
 
 describe("WebMCP registration", () => {
+  it("registers the contextual fact tool separately from the five core tools", async () => {
+    const registered: WebMCP.ModelContextTool[] = [];
+    const modelContext = {
+      registerTool: vi.fn(async (tool) => {
+        registered.push(tool);
+      }),
+    } as unknown as WebMCP.ModelContext;
+
+    const registration = await registerApplicantFactTool(
+      createWorkspaceControllerHarness(),
+      modelContext,
+    );
+
+    expect(registration.supported).toBe(true);
+    expect(registered.map((tool) => tool.name)).toEqual([
+      "request_applicant_fact",
+    ]);
+  });
+
   it("registers exactly five tools and aborts their lifecycle on dispose", async () => {
     const registered: WebMCP.ModelContextTool[] = [];
     let lifecycleSignal: AbortSignal | undefined;

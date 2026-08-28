@@ -17,13 +17,15 @@ clicks. The page itself publishes a typed collaboration surface through WebMCP.
 
 1. Open the live URL in ChatGPT's in-app browser or a WebMCP-enabled Chrome.
 2. Confirm the header says **WebMCP connected**. The application registers five
-   tools against its actual page state, not a detached demo API.
+   core tools against its actual page state, plus one contextual fact request
+   only while the applicant's audience fact is missing.
 3. Ask the agent to read context and audit the incomplete sample. It returns the
    deterministic blockers without editing the draft.
 4. Ask it to stage a concise patch. The page shows the exact diff; the draft does
    not change until the person uses **Apply proposed changes**.
-5. Supply the human-owned audience fact and attestation in the page, then ask the
-   agent to audit and prepare an exact review.
+5. Ask the agent to request the missing audience fact. The page—not the agent—
+   asks its fixed question and waits for the applicant's native response. Add
+   evidence and attestation, then ask the agent to audit and prepare an exact review.
 6. Use the native **Authorize exact application** control, then ask the agent to
    submit the matching review ID and draft hash. The application records one
    receipt bound to that reviewed hash, including the measured journey from the
@@ -61,6 +63,12 @@ transitions. There is no hidden agent workflow and no embedded LLM.
 | `prepare_submission` | Re-audits the expected revision and creates a five-minute hash-bound review. | Cannot authorize or submit. |
 | `submit_approved_application` | Records a single receipt for a matching approved review. | Requires native human authorization of the exact review ID and hash. |
 
+When `audienceProblem` is blank, the page additionally and temporarily exposes
+`request_applicant_fact({ field: "audienceProblem" })`. It has no free-form
+question parameter and cannot write a draft field itself: it opens the page's
+fixed native question, waits, and returns only an answer the applicant chose to
+share. Once answered, that contextual tool disappears.
+
 The tool definitions are in
 [`src/webmcp/tool-executors.ts`](src/webmcp/tool-executors.ts); registration and
 `AbortSignal` cleanup are in
@@ -95,6 +103,10 @@ for (const tool of createToolDefinitions(controller)) {
   URLs. It makes no arbitrary URL requests; an API failure falls back only to
   bounded GitHub and raw-license endpoints.
 - All agent-provided and external text is rendered as text, never trusted HTML.
+- A staged proposal is audited against an in-memory candidate before it is shown
+  as a readiness preview. The candidate never changes the live revision; if its
+  public repository metadata is unverified, the page suppresses the projected
+  score rather than inventing one.
 
 ## Local setup
 

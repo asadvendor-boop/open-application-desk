@@ -92,6 +92,14 @@ test("completes the human-controlled WebMCP journey from blockers to receipt", a
   await expect(
     page.getByRole("heading", { name: "Proposed change" }),
   ).toBeVisible();
+  await expect(page.getByText("Preview only — not applied")).toBeVisible();
+  await expect(page.getByLabel("Now: 3 of 10 ready")).toBeVisible();
+  await expect(
+    page.getByLabel("After this proposal: 7 of 10 ready"),
+  ).toBeVisible();
+  await expect(
+    page.getByText("Four blockers resolved · Three require the applicant"),
+  ).toBeVisible();
   await expect(
     page.getByRole("button", { name: "Apply proposed changes" }),
   ).toBeInViewport({ ratio: 1 });
@@ -103,11 +111,22 @@ test("completes the human-controlled WebMCP journey from blockers to receipt", a
   await page.getByRole("button", { name: "Apply proposed changes" }).click();
   await expect(page.getByLabel("Project summary")).not.toHaveValue(originalSummary);
 
-  await page
-    .getByLabel("Audience and problem")
-    .fill(
-      "Applicants under deadline pressure risk rejection when requirements, claims, and public evidence drift across disconnected tabs.",
-    );
+  const applicantFact = executeWebMcpTool<{
+    outcome: string;
+    source?: string;
+    draftRevision?: number;
+  }>(page, "request_applicant_fact", { field: "audienceProblem" });
+  await expect(
+    page.getByRole("heading", { name: "A fact only you can supply" }),
+  ).toBeVisible();
+  await page.getByLabel("Your answer").fill(
+    "Applicants under deadline pressure risk rejection when requirements, claims, and public evidence drift across disconnected tabs.",
+  );
+  await page.getByRole("button", { name: "Share answer with ChatGPT" }).click();
+  await expect(applicantFact).resolves.toMatchObject({
+    outcome: "answered",
+    source: "human",
+  });
   await page.getByLabel("Evidence type").selectOption("live_demo");
   await page
     .getByLabel("Claim", { exact: true })
@@ -227,9 +246,14 @@ test("reconciles concurrent submissions from two Chromium tabs to one receipt", 
   await page.getByLabel("Project summary").fill(
     "A concise WebMCP application workspace where people retain review and submission authority.",
   );
-  await page.getByLabel("Audience and problem").fill(
+  const applicantFact = executeWebMcpTool(page, "request_applicant_fact", {
+    field: "audienceProblem",
+  });
+  await page.getByLabel("Your answer").fill(
     "Applicants need one reliable place to keep requirements, public evidence, and submission authority aligned.",
   );
+  await page.getByRole("button", { name: "Share answer with ChatGPT" }).click();
+  await applicantFact;
   await page
     .getByLabel("Live URL")
     .fill("https://example.com/open-application-desk");

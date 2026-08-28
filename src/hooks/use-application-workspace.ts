@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { auditApplication } from "@/domain/application/audit";
 import {
@@ -21,7 +21,9 @@ import type {
 } from "@/domain/application/types";
 import {
   applyPatch as applyWorkspacePatch,
+  applyPatchChangesToDraft,
   authorizeReview,
+  createReadinessProjection,
   createWorkspace,
   editDraftField,
   prepareReview,
@@ -44,6 +46,31 @@ type PersistenceState =
   | { status: "error"; message: string };
 
 const SUBMISSION_LOCK_NAME = "webmcp-application-portal:submission";
+const APPLICANT_FACT_QUESTION =
+  "Who is this application for, and what specific difficulty do they face?";
+
+export interface ApplicantFactRequest {
+  id: string;
+  field: "audienceProblem";
+  question: string;
+}
+
+export type ApplicantFactResult =
+  | {
+      outcome: "answered";
+      field: "audienceProblem";
+      source: "human";
+      value: string;
+      draftRevision: number;
+    }
+  | {
+      outcome: "cancelled" | "already_pending" | "not_needed";
+      field: "audienceProblem";
+    };
+
+interface PendingApplicantFact extends ApplicantFactRequest {
+  resolve: (result: ApplicantFactResult) => void;
+}
 
 export interface WorkspaceController {
   getState(): WorkspaceState;
@@ -51,7 +78,14 @@ export interface WorkspaceController {
   setAttestation(value: boolean): void;
   upsertEvidence(evidence: EvidenceBinding): void;
   runAudit(signal?: AbortSignal): Promise<AuditReport>;
-  stagePatch(input: StagePatchInput): StagedPatch;
+  stagePatch(input: StagePatchInput, signal?: AbortSignal): Promise<StagedPatch>;
+  hasMissingApplicantFact(): boolean;
+  requestApplicantFact(
+    field: "audienceProblem",
+    signal?: AbortSignal,
+  ): Promise<ApplicantFactResult>;
+  answerApplicantFact(value: string): void;
+  cancelApplicantFact(): void;
   applyPatch(patchId: string): void;
   rejectPatch(patchId: string): void;
   prepareSubmission(): Promise<ReviewSnapshot>;
@@ -106,6 +140,7 @@ export function useApplicationWorkspace(): {
   workspace: WorkspaceState;
   controller: WorkspaceController;
   persistence: PersistenceState;
+  pendingApplicantFact: ApplicantFactRequest | null;
 } {
   const [workspace, setWorkspace] = useState<WorkspaceState>(initialWorkspace);
   const [persistence, setPersistence] = useState<PersistenceState>(() =>
@@ -114,6 +149,33 @@ export function useApplicationWorkspace(): {
       : { status: "unsaved", message: "Judge workspace — not yet saved" },
   );
   const workspaceRef = useRef(workspace);
+  const pendingApplicantFactRef = useRef<PendingApplicantFact | null>(null);
+  const [pendingApplicantFact, setPendingApplicantFact] =
+    useState<ApplicantFactRequest | null>(null);
+  const mountedRef = useRef(true);
+
+  const settlePendingApplicantFact = useCallback(
+    (result: ApplicantFactResult) => {
+      const pending = pendingApplicantFactRef.current;
+      if (!pending) {
+        return;
+      }
+      pendingApplicantFactRef.current = null;
+      if (mountedRef.current) {
+        setPendingApplicantFact(null);
+      }
+      pending.resolve(result);
+    },
+    [],
+  );
+
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+      settlePendingApplicantFact({ outcome: "cancelled", field: "audienceProblem" });
+    };
+  }, [settlePendingApplicantFact]);
 
   const commit = useCallback(
     (next: WorkspaceState, requirePersistence = false): boolean => {
@@ -137,6 +199,49 @@ export function useApplicationWorkspace(): {
   );
 
   const controller = useMemo<WorkspaceController>(() => {
+    async function repositoryFor(
+      repositoryUrl: string,
+      signal?: AbortSignal,
+    ): Promise<RepositoryVerification | null> {
+      if (!repositoryUrl.trim()) {
+        return null;
+      }
+      try {
+        const response = await fetch("/api/github-repository", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ repositoryUrl }),
+          signal,
+        });
+        const parsed = repositoryVerificationSchema.safeParse(
+          await response.json(),
+        );
+        return parsed.success
+          ? parsed.data
+          : unavailableRepository(
+              repositoryUrl,
+              "Repository metadata response was unverified.",
+            );
+      } catch (error) {
+        if (signal?.aborted) {
+          throw error;
+        }
+        return unavailableRepository(
+          repositoryUrl,
+          "Repository metadata request was unverified.",
+        );
+      }
+    }
+
+    async function auditDraft(
+      draft: WorkspaceState["draft"],
+      signal?: AbortSignal,
+    ): Promise<{ report: AuditReport; repository: RepositoryVerification | null }> {
+      const repository = await repositoryFor(draft.fields.repositoryUrl, signal);
+      signal?.throwIfAborted();
+      return { report: auditApplication(draft, repository, nowIso()), repository };
+    }
+
     return {
       getState: () => workspaceRef.current,
       editField(field, value) {
@@ -149,51 +254,96 @@ export function useApplicationWorkspace(): {
         commit(mutateEvidence(workspaceRef.current, evidence, nowIso()));
       },
       async runAudit(signal) {
-        const snapshot = workspaceRef.current.draft;
-        const repositoryUrl = snapshot.fields.repositoryUrl.trim();
-        let repository: RepositoryVerification | null = null;
-
-        if (repositoryUrl) {
-          try {
-            const response = await fetch("/api/github-repository", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ repositoryUrl }),
-              signal,
-            });
-            const parsed = repositoryVerificationSchema.safeParse(
-              await response.json(),
-            );
-            repository = parsed.success
-              ? parsed.data
-              : unavailableRepository(
-                  repositoryUrl,
-                  "Repository metadata response was unverified.",
-                );
-          } catch (error) {
-            if (signal?.aborted) {
-              throw error;
-            }
-            repository = unavailableRepository(
-              repositoryUrl,
-              "Repository metadata request was unverified.",
-            );
-          }
-        }
-
-        const report = auditApplication(snapshot, repository, nowIso());
+        const { report } = await auditDraft(workspaceRef.current.draft, signal);
         commit(recordAudit(workspaceRef.current, report));
         return report;
       },
-      stagePatch(input) {
+      async stagePatch(input, signal) {
+        const sourceState = workspaceRef.current;
+        const candidateDraft = applyPatchChangesToDraft(
+          sourceState.draft,
+          input.changes,
+        );
+        const [currentResult, projectedResult] = await Promise.all([
+          auditDraft(sourceState.draft, signal),
+          auditDraft(candidateDraft, signal),
+        ]);
+        signal?.throwIfAborted();
+        if (workspaceRef.current !== sourceState) {
+          throw new Error("The application changed while the proposal was being evaluated.");
+        }
         const next = stageWorkspacePatch(
-          workspaceRef.current,
+          sourceState,
           input,
           makeId("patch"),
           nowIso(),
+          candidateDraft.fields.repositoryUrl.trim() &&
+          projectedResult.repository?.status !== "verified"
+            ? undefined
+            : createReadinessProjection(currentResult.report, projectedResult.report),
         );
         commit(next);
         return next.stagedPatch!;
+      },
+      hasMissingApplicantFact() {
+        return !workspaceRef.current.draft.fields.audienceProblem.trim();
+      },
+      async requestApplicantFact(field, signal) {
+        signal?.throwIfAborted();
+        if (
+          field !== "audienceProblem" ||
+          workspaceRef.current.draft.fields.audienceProblem.trim()
+        ) {
+          return { outcome: "not_needed", field: "audienceProblem" };
+        }
+        if (pendingApplicantFactRef.current) {
+          return { outcome: "already_pending", field: "audienceProblem" };
+        }
+        return new Promise<ApplicantFactResult>((resolve) => {
+          const request: ApplicantFactRequest = {
+            id: makeId("applicant-fact"),
+            field: "audienceProblem",
+            question: APPLICANT_FACT_QUESTION,
+          };
+          pendingApplicantFactRef.current = { ...request, resolve };
+          setPendingApplicantFact(request);
+          signal?.addEventListener(
+            "abort",
+            () =>
+              settlePendingApplicantFact({
+                outcome: "cancelled",
+                field: "audienceProblem",
+              }),
+            { once: true },
+          );
+        });
+      },
+      answerApplicantFact(value) {
+        const pending = pendingApplicantFactRef.current;
+        const answer = value.trim();
+        if (!pending || !answer) {
+          throw new Error("A non-empty answer is required for the active applicant request.");
+        }
+        const next = editDraftField(
+          workspaceRef.current,
+          "audienceProblem",
+          answer,
+          nowIso(),
+        );
+        commit(next);
+        settlePendingApplicantFact({
+          outcome: "answered",
+          field: "audienceProblem",
+          source: "human",
+          value: answer,
+          draftRevision: next.draft.revision,
+        });
+      },
+      cancelApplicantFact() {
+        settlePendingApplicantFact({
+          outcome: "cancelled",
+          field: "audienceProblem",
+        });
       },
       applyPatch(patchId) {
         commit(applyWorkspacePatch(workspaceRef.current, patchId, nowIso()));
@@ -270,12 +420,16 @@ export function useApplicationWorkspace(): {
         });
       },
       reset() {
+        settlePendingApplicantFact({
+          outcome: "cancelled",
+          field: "audienceProblem",
+        });
         clearWorkspace();
         const next = createWorkspace(createSampleDraft(nowIso()));
         commit(next);
       },
     };
-  }, [commit]);
+  }, [commit, settlePendingApplicantFact]);
 
-  return { workspace, controller, persistence };
+  return { workspace, controller, persistence, pendingApplicantFact };
 }

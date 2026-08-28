@@ -7,6 +7,7 @@ import type { AuditReport, EvidenceBinding } from "@/domain/application/types";
 import { useApplicationWorkspace } from "@/hooks/use-application-workspace";
 import { useWebMcpTools } from "@/hooks/use-webmcp-tools";
 import { ActivityTimeline } from "./activity-timeline";
+import { ApplicantFactHandoff } from "./applicant-fact-handoff";
 import { ApplicationEditor } from "./application-editor";
 import { PatchReviewDrawer } from "./patch-review-drawer";
 import { ReadinessRail } from "./readiness-rail";
@@ -26,7 +27,7 @@ function auditNotice(report: AuditReport): string {
 }
 
 export function ApplicationWorkspace() {
-  const { workspace, controller, persistence } = useApplicationWorkspace();
+  const { workspace, controller, persistence, pendingApplicantFact } = useApplicationWorkspace();
   const [busy, setBusy] = useState<BusyState>("idle");
   const [notice, setNotice] = useState(
     "The form and readiness gate share one live application state.",
@@ -34,7 +35,11 @@ export function ApplicationWorkspace() {
   const onWebMcpAuditCompleted = useCallback((report: AuditReport) => {
     setNotice(auditNotice(report));
   }, []);
-  const webMcpConnection = useWebMcpTools(controller, onWebMcpAuditCompleted);
+  const webMcpConnection = useWebMcpTools(
+    controller,
+    onWebMcpAuditCompleted,
+    !workspace.draft.fields.audienceProblem.trim(),
+  );
 
   async function runAudit() {
     setBusy("auditing");
@@ -169,11 +174,25 @@ export function ApplicationWorkspace() {
               <h2>This form can explain itself.<br />You decide what gets submitted.</h2>
             </div>
             <p>
-              Instead of scraping pixels, ChatGPT gets five typed WebMCP tools for
-              this exact draft. Native controls keep facts, changes, and
-              authorization human-owned.
+              Instead of scraping pixels, ChatGPT gets five core typed WebMCP
+              tools for this exact draft. Native controls keep facts, changes,
+              and authorization human-owned.
             </p>
           </div>
+
+          {pendingApplicantFact ? (
+            <ApplicantFactHandoff
+              request={pendingApplicantFact}
+              onAnswer={(value) => {
+                controller.answerApplicantFact(value);
+                setNotice("You supplied the fact the waiting agent could not truthfully infer.");
+              }}
+              onCancel={() => {
+                controller.cancelApplicantFact();
+                setNotice("The applicant fact request was cancelled; the draft was not changed.");
+              }}
+            />
+          ) : null}
 
           <ApplicationEditor
             draft={workspace.draft}
