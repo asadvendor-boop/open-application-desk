@@ -725,7 +725,7 @@ Run: `npm test -- src/storage/local-workspace.test.ts src/components/application
 
 Expected: all commands PASS without hydration warnings.
 
-- [ ] **Step 7: Commit and deploy the Day 1 path to OpenAI Sites**
+- [x] **Step 7: Commit and deploy the Day 1 path to OpenAI Sites**
 
 ```bash
 PATH=/Users/asad.ali/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin:$PATH npm run verify
@@ -761,7 +761,7 @@ broken UI.
 - Consumes: `WorkspaceController` and strict domain schemas.
 - Produces: `createToolDefinitions()`, `registerWebMcpTools()`, `useWebMcpTools()`, and exactly five discoverable tools.
 
-- [ ] **Step 1: Write failing registration and cancellation tests**
+- [x] **Step 1: Write failing registration and cancellation tests**
 
 Add `createWorkspaceControllerHarness(initialDraft)` to `src/test/fixtures.ts`.
 It stores `WorkspaceState` in a local variable, delegates every method to the
@@ -816,13 +816,13 @@ it("stages but does not apply an agent-proposed patch", async () => {
 });
 ```
 
-- [ ] **Step 2: Verify WebMCP tests fail**
+- [x] **Step 2: Verify WebMCP tests fail**
 
 Run: `npm test -- src/webmcp/tool-executors.test.ts src/webmcp/register-tools.test.ts`
 
 Expected: FAIL because the adapter is absent.
 
-- [ ] **Step 3: Add current API types and strict schemas**
+- [x] **Step 3: Add current API types and strict schemas**
 
 Create `src/types/webmcp.d.ts`:
 
@@ -834,7 +834,7 @@ Every JSON Schema uses `additionalProperties: false`. Patch input permits one to
 four changes. Submit input requires `reviewId` and `draftHash`. Human attestation
 and authorization are never tool inputs.
 
-- [ ] **Step 4: Implement structured executors**
+- [x] **Step 4: Implement structured executors**
 
 Each `execute(input, { signal })` calls `signal.throwIfAborted()` before and after
 awaited work, validates with Zod, appends a concise agent activity, and returns
@@ -854,7 +854,7 @@ The stage tool description states: `Stage allowlisted edits as a visible diff.
 This does not modify the application. The person must apply or reject the patch
 in the page.`
 
-- [ ] **Step 5: Implement registration and cleanup**
+- [x] **Step 5: Implement registration and cleanup**
 
 ```ts
 export async function registerWebMcpTools(
@@ -883,13 +883,13 @@ export async function registerWebMcpTools(
 The hook disposes on unmount and survives React strict-mode remount without
 duplicate tools. Registration failure sets visible status `error`.
 
-- [ ] **Step 6: Run WebMCP and full gates**
+- [x] **Step 6: Run WebMCP and full gates**
 
 Run: `npm test -- src/webmcp/tool-executors.test.ts src/webmcp/register-tools.test.ts && npm test && npm run lint && npm run typecheck && npm run build`
 
 Expected: all commands PASS and the fake observes exactly five names.
 
-- [ ] **Step 7: Commit the WebMCP boundary**
+- [x] **Step 7: Commit the WebMCP boundary**
 
 ```bash
 git add src/webmcp src/hooks src/components src/types
@@ -1038,13 +1038,12 @@ gh repo view --json url,visibility,licenseInfo
 Expected: visibility `PUBLIC` and license `MIT`. If indexing is pending, query
 once again later; do not change the license text.
 
-- [ ] **Step 5: Deploy the exact public commit**
+- [ ] **Step 5: Deploy the exact public commit to OpenAI Sites**
 
-```bash
-npx vercel@latest --prod
-git rev-parse HEAD
-git status --short --branch
-```
+Push the exact clean commit to the Site source repository, build and package that
+same commit, save a new Site version, and deploy that saved version. Record the
+Sites production URL, version ID, deployment ID, and source commit in the
+execution log. Require a clean status.
 
 Record production URL and commit in the execution log. Require clean status.
 

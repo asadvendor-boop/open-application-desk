@@ -1,6 +1,31 @@
-import type { ApplicationDraft } from "@/domain/application/types";
 import { auditApplication } from "@/domain/application/audit";
 import type { RepositoryVerification } from "@/domain/application/github";
+import type { StagePatchInput } from "@/domain/application/schemas";
+import type {
+  ActivityEntry,
+  ApplicationDraft,
+  ApplicationFieldKey,
+  AuditReport,
+  EvidenceBinding,
+  ReviewSnapshot,
+  StagedPatch,
+  SubmissionReceipt,
+  WorkspaceState,
+} from "@/domain/application/types";
+import {
+  applyPatch,
+  authorizeReview,
+  createWorkspace,
+  editDraftField,
+  prepareReview,
+  recordAudit,
+  rejectPatch,
+  setAttestation,
+  stagePatch,
+  submitApproved,
+  upsertEvidence,
+} from "@/domain/application/workspace";
+import type { WorkspaceController } from "@/hooks/use-application-workspace";
 
 export const verifiedRepository: RepositoryVerification = {
   status: "verified",
@@ -55,4 +80,100 @@ export function passingAudit() {
     verifiedRepository,
     "2026-08-27T01:00:00.000Z",
   );
+}
+
+export interface WorkspaceControllerHarness extends WorkspaceController {
+  replaceState(next: WorkspaceState): void;
+}
+
+export function createWorkspaceControllerHarness(
+  initialDraft: ApplicationDraft = createValidDraft(),
+  repository: RepositoryVerification = verifiedRepository,
+): WorkspaceControllerHarness {
+  let state = createWorkspace(initialDraft);
+  let sequence = 0;
+
+  const nextNow = () =>
+    new Date(Date.parse("2026-08-27T01:00:00.000Z") + sequence++ * 1_000)
+      .toISOString();
+  const nextId = (prefix: string) => `${prefix}-${++sequence}`;
+  const commit = (next: WorkspaceState) => {
+    state = next;
+  };
+
+  return {
+    getState: () => state,
+    replaceState(next) {
+      state = next;
+    },
+    editField(field: ApplicationFieldKey, value: string) {
+      commit(editDraftField(state, field, value, nextNow()));
+    },
+    setAttestation(value: boolean) {
+      commit(setAttestation(state, value, nextNow()));
+    },
+    upsertEvidence(evidence: EvidenceBinding) {
+      commit(upsertEvidence(state, evidence, nextNow()));
+    },
+    async runAudit(signal?: AbortSignal): Promise<AuditReport> {
+      signal?.throwIfAborted();
+      const report = auditApplication(state.draft, repository, nextNow());
+      signal?.throwIfAborted();
+      commit(recordAudit(state, report));
+      return report;
+    },
+    stagePatch(input: StagePatchInput): StagedPatch {
+      commit(stagePatch(state, input, nextId("patch"), nextNow()));
+      return state.stagedPatch!;
+    },
+    applyPatch(patchId: string) {
+      commit(applyPatch(state, patchId, nextNow()));
+    },
+    rejectPatch(patchId: string) {
+      commit(rejectPatch(state, patchId, nextNow()));
+    },
+    async prepareSubmission(): Promise<ReviewSnapshot> {
+      commit(await prepareReview(state, nextId("review"), nextNow()));
+      return state.review!;
+    },
+    authorizeSubmission(reviewId: string) {
+      commit(authorizeReview(state, reviewId, nextNow()));
+    },
+    async submit(
+      reviewId: string,
+      draftHash: string,
+    ): Promise<SubmissionReceipt> {
+      commit(
+        await submitApproved(
+          state,
+          { reviewId, draftHash },
+          nextId("receipt"),
+          nextNow(),
+        ),
+      );
+      return state.receipt!;
+    },
+    recordActivity(
+      actor: ActivityEntry["actor"],
+      action: string,
+      summary: string,
+    ) {
+      state = {
+        ...state,
+        activity: [
+          ...state.activity,
+          {
+            id: nextId("activity"),
+            actor,
+            action,
+            summary,
+            createdAt: nextNow(),
+          },
+        ],
+      };
+    },
+    reset() {
+      state = createWorkspace(initialDraft);
+    },
+  };
 }

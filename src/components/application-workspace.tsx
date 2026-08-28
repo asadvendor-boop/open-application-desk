@@ -5,6 +5,7 @@ import { useState } from "react";
 import { PROGRAM } from "@/domain/application/sample-program";
 import type { EvidenceBinding } from "@/domain/application/types";
 import { useApplicationWorkspace } from "@/hooks/use-application-workspace";
+import { useWebMcpTools } from "@/hooks/use-webmcp-tools";
 import { ActivityTimeline } from "./activity-timeline";
 import { ApplicationEditor } from "./application-editor";
 import { PatchReviewDrawer } from "./patch-review-drawer";
@@ -20,6 +21,7 @@ function errorMessage(error: unknown): string {
 
 export function ApplicationWorkspace() {
   const { workspace, controller, persistence } = useApplicationWorkspace();
+  const webMcpConnection = useWebMcpTools(controller);
   const [busy, setBusy] = useState<BusyState>("idle");
   const [notice, setNotice] = useState(
     "The form and readiness gate share one live application state.",
@@ -124,7 +126,7 @@ export function ApplicationWorkspace() {
         </div>
 
         <div className="header-actions">
-          <WebMcpStatus />
+          <WebMcpStatus connection={webMcpConnection} />
           <button className="text-button" type="button" onClick={resetWorkspace}>
             Reset sample
           </button>
@@ -162,8 +164,8 @@ export function ApplicationWorkspace() {
               <h2>One application.<br />One source of truth.</h2>
             </div>
             <p>
-              Edit normally. The portal owns the rules; future WebMCP tools will
-              inspect and prepare this same state, never a scraped copy.
+              Edit normally. The portal owns the rules; WebMCP tools inspect and
+              prepare this same state, never a scraped copy.
             </p>
           </div>
 
