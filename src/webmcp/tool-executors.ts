@@ -25,6 +25,10 @@ function parseInput<T>(
   return parsed.data;
 }
 
+function throwIfAborted(execution?: { signal?: AbortSignal }) {
+  execution?.signal?.throwIfAborted();
+}
+
 function getApplicationContext(
   controller: WorkspaceController,
   input: Record<string, unknown>,
@@ -104,10 +108,10 @@ export function createToolDefinitions(
         "Read selected program rules, the exact live draft, deterministic audit, and workflow state. This does not change the application.",
       inputSchema: toolInputSchemas.get_application_context,
       annotations: { readOnlyHint: true, untrustedContentHint: true },
-      async execute(input, { signal }) {
-        signal.throwIfAborted();
+      async execute(input, execution?) {
+        throwIfAborted(execution);
         const result = getApplicationContext(controller, input);
-        signal.throwIfAborted();
+        throwIfAborted(execution);
         return result;
       },
     },
@@ -118,15 +122,15 @@ export function createToolDefinitions(
         "Run deterministic requirements and bounded public-repository checks against the exact live draft. This records an audit but does not edit application content.",
       inputSchema: toolInputSchemas.audit_application,
       annotations: { readOnlyHint: false, untrustedContentHint: true },
-      async execute(input, { signal }) {
-        signal.throwIfAborted();
+      async execute(input, execution?) {
+        throwIfAborted(execution);
         const parsed = parseInput(
           auditApplicationInputSchema,
           input,
           "audit_application",
         );
-        const report = await controller.runAudit(signal);
-        signal.throwIfAborted();
+        const report = await controller.runAudit(execution?.signal);
+        throwIfAborted(execution);
         controller.recordActivity(
           "agent",
           "tool_audit",
@@ -155,15 +159,15 @@ export function createToolDefinitions(
         "Stage allowlisted edits as a visible diff. This does not modify the application. The person must apply or reject the patch in the page.",
       inputSchema: toolInputSchemas.stage_draft_patch,
       annotations: { readOnlyHint: false, untrustedContentHint: false },
-      async execute(input, { signal }) {
-        signal.throwIfAborted();
+      async execute(input, execution?) {
+        throwIfAborted(execution);
         const parsed = parseInput(
           stagePatchInputSchema,
           input,
           "stage_draft_patch",
         );
         const patch = controller.stagePatch(parsed);
-        signal.throwIfAborted();
+        throwIfAborted(execution);
         return {
           outcome: "staged",
           patchId: patch.id,
@@ -180,8 +184,8 @@ export function createToolDefinitions(
         "Re-audit the expected live revision and create a hash-bound review snapshot. This cannot authorize or submit the application.",
       inputSchema: toolInputSchemas.prepare_submission,
       annotations: { readOnlyHint: false, untrustedContentHint: true },
-      async execute(input, { signal }) {
-        signal.throwIfAborted();
+      async execute(input, execution?) {
+        throwIfAborted(execution);
         const parsed = parseInput(
           prepareSubmissionInputSchema,
           input,
@@ -192,13 +196,13 @@ export function createToolDefinitions(
             "The expected draft revision is stale. Read the application context again.",
           );
         }
-        const report = await controller.runAudit(signal);
-        signal.throwIfAborted();
+        const report = await controller.runAudit(execution?.signal);
+        throwIfAborted(execution);
         if (report.draftRevision !== parsed.expectedDraftRevision) {
           throw new Error("The draft changed while preparation was running.");
         }
         const review = await controller.prepareSubmission();
-        signal.throwIfAborted();
+        throwIfAborted(execution);
         controller.recordActivity(
           "agent",
           "tool_prepare_submission",
@@ -221,8 +225,8 @@ export function createToolDefinitions(
         "Submit only the exact review ID and draft hash already authorized through the page's native human control. Repeated matching calls return the original receipt.",
       inputSchema: toolInputSchemas.submit_approved_application,
       annotations: { readOnlyHint: false, untrustedContentHint: false },
-      async execute(input, { signal }) {
-        signal.throwIfAborted();
+      async execute(input, execution?) {
+        throwIfAborted(execution);
         const parsed = parseInput(
           submitApprovedApplicationInputSchema,
           input,
@@ -232,7 +236,7 @@ export function createToolDefinitions(
           parsed.reviewId,
           parsed.draftHash,
         );
-        signal.throwIfAborted();
+        throwIfAborted(execution);
         controller.recordActivity(
           "agent",
           "tool_submit_approved",

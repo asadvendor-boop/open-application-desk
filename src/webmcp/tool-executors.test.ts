@@ -22,7 +22,61 @@ function toolNamed(
 
 const liveSignal = () => new AbortController().signal;
 
+async function executeWithoutBrowserContext(
+  tool: WebMCP.ModelContextTool,
+  input: Record<string, unknown>,
+) {
+  return (
+    tool.execute as (input: Record<string, unknown>) => Promise<unknown>
+  )(input);
+}
+
 describe("WebMCP tool executors", () => {
+  it("runs the complete tool path when a native browser omits execution context", async () => {
+    const controller = createWorkspaceControllerHarness(createValidDraft());
+    const tools = createToolDefinitions(controller);
+    const tool = (name: string) => {
+      const definition = tools.find((candidate) => candidate.name === name);
+      if (!definition) {
+        throw new Error(`Missing ${name}`);
+      }
+      return definition;
+    };
+
+    await expect(
+      executeWithoutBrowserContext(tool("get_application_context"), {
+        sections: ["draft", "workflow"],
+      }),
+    ).resolves.toMatchObject({ outcome: "context" });
+    await expect(
+      executeWithoutBrowserContext(tool("audit_application"), {}),
+    ).resolves.toMatchObject({ outcome: "audited", blockingCount: 0 });
+    await expect(
+      executeWithoutBrowserContext(tool("stage_draft_patch"), {
+        changes: [
+          {
+            field: "summary",
+            value: "A shorter summary.",
+            rationale: "Meet the stated limit.",
+          },
+        ],
+      }),
+    ).resolves.toMatchObject({ outcome: "staged" });
+
+    const prepared = (await executeWithoutBrowserContext(
+      tool("prepare_submission"),
+      { expectedDraftRevision: 3 },
+    )) as { reviewId: string; draftHash: string };
+    controller.authorizeSubmission(prepared.reviewId);
+
+    await expect(
+      executeWithoutBrowserContext(tool("submit_approved_application"), {
+        reviewId: prepared.reviewId,
+        draftHash: prepared.draftHash,
+      }),
+    ).resolves.toMatchObject({ outcome: "submitted" });
+  });
+
   it("reads the exact current application without mutating it", async () => {
     const { controller, tool } = toolNamed("get_application_context");
     const before = structuredClone(controller.getState());
