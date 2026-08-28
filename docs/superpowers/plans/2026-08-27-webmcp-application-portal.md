@@ -990,7 +990,7 @@ git commit -m "test: prove the WebMCP judge journey"
 - Consumes: frozen local release candidate.
 - Produces: public repository URL, production URL, detected license, and two-browser WebMCP evidence.
 
-- [ ] **Step 1: Add root license and judge-first README**
+- [x] **Step 1: Add root license and judge-first README**
 
 Use the MIT license with copyright `2026 Asad Ali`. README order:
 
@@ -1008,7 +1008,7 @@ Use the MIT license with copyright `2026 Asad Ali`. README order:
 `.env.example` contains only optional `GITHUB_TOKEN=` and explains the public API
 rate limit. Never add a real token.
 
-- [ ] **Step 2: Run repository-content checks**
+- [x] **Step 2: Run repository-content checks**
 
 ```bash
 if git grep -nE 'sk-[A-Za-z0-9_-]{16,}|gh[pousr]_[A-Za-z0-9]{20,}|BEGIN (RSA|OPENSSH|EC) PRIVATE KEY' -- . ':!package-lock.json'; then exit 1; else echo "secret scan: no findings"; fi
@@ -1017,7 +1017,7 @@ git status --short
 
 Expected: secret search prints nothing; status lists only intended release docs.
 
-- [ ] **Step 3: Commit public-release documentation**
+- [x] **Step 3: Commit public-release documentation**
 
 ```bash
 git add README.md LICENSE .env.example
