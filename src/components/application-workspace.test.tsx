@@ -104,5 +104,9 @@ describe("application workspace", () => {
 
     expect(await screen.findByText("Submission receipt")).toBeInTheDocument();
     expect(screen.getByText(/Recorded against review/)).toBeInTheDocument();
+    expect(screen.getByText(/Submitted r\d+/)).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Prepare exact review" }),
+    ).not.toBeInTheDocument();
   });
 });

@@ -182,6 +182,7 @@ export function ApplicationWorkspace() {
           <ReadinessRail
             audit={workspace.audit}
             draftRevision={workspace.draft.revision}
+            submitted={Boolean(workspace.receipt)}
             busy={
               busy === "auditing" || busy === "preparing" ? busy : "idle"
             }

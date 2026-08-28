@@ -18,6 +18,18 @@ import {
 const NOW = "2026-08-27T01:00:00.000Z";
 const LATER = "2026-08-27T01:01:00.000Z";
 
+async function submittedWorkspace() {
+  const ready = recordAudit(createWorkspace(createValidDraft()), passingAudit());
+  const reviewed = await prepareReview(ready, "review-1", NOW);
+  const authorized = authorizeReview(reviewed, "review-1", LATER);
+  return submitApproved(
+    authorized,
+    { reviewId: "review-1", draftHash: authorized.review!.draftHash },
+    "receipt-1",
+    LATER,
+  );
+}
+
 describe("workspace authority boundaries", () => {
   it("stages a patch without changing the draft", () => {
     const original = createWorkspace(createValidDraft());
@@ -220,5 +232,59 @@ describe("workspace authority boundaries", () => {
 
     expect(repeated.receipt?.id).toBe("receipt-1");
     expect(repeated.draft.workflowState).toBe("submitted");
+  });
+
+  it("does not prepare another review after the application was submitted", async () => {
+    const submitted = await submittedWorkspace();
+
+    await expect(
+      prepareReview(submitted, "review-2", LATER),
+    ).rejects.toThrow("already submitted");
+    expect(submitted.receipt?.id).toBe("receipt-1");
+  });
+
+  it("does not stage a new patch after the application was submitted", async () => {
+    const submitted = await submittedWorkspace();
+
+    expect(() =>
+      stagePatch(
+        submitted,
+        {
+          changes: [
+            { field: "summary", value: "Changed", rationale: "Try again" },
+          ],
+        },
+        "patch-after-submit",
+        LATER,
+      ),
+    ).toThrow("already submitted");
+    expect(submitted.receipt?.id).toBe("receipt-1");
+  });
+
+  it("does not apply a previously staged patch after submission", async () => {
+    const ready = recordAudit(createWorkspace(createValidDraft()), passingAudit());
+    const staged = stagePatch(
+      ready,
+      {
+        changes: [
+          { field: "summary", value: "Changed", rationale: "Try again" },
+        ],
+      },
+      "patch-1",
+      NOW,
+    );
+    const reviewed = await prepareReview(staged, "review-1", NOW);
+    const authorized = authorizeReview(reviewed, "review-1", LATER);
+    const submitted = await submitApproved(
+      authorized,
+      { reviewId: "review-1", draftHash: authorized.review!.draftHash },
+      "receipt-1",
+      LATER,
+    );
+
+    expect(() => applyPatch(submitted, "patch-1", LATER)).toThrow(
+      "already submitted",
+    );
+    expect(submitted.receipt?.id).toBe("receipt-1");
   });
 });

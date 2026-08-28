@@ -191,11 +191,17 @@ export function useApplicationWorkspace(): {
         commit(rejectWorkspacePatch(workspaceRef.current, patchId, nowIso()));
       },
       async prepareSubmission() {
+        const sourceState = workspaceRef.current;
         const next = await prepareReview(
-          workspaceRef.current,
+          sourceState,
           makeId("review"),
           nowIso(),
         );
+        if (workspaceRef.current !== sourceState) {
+          throw new Error(
+            "The application changed while the review was being prepared.",
+          );
+        }
         commit(next);
         return next.review!;
       },
@@ -203,12 +209,18 @@ export function useApplicationWorkspace(): {
         commit(authorizeReview(workspaceRef.current, reviewId, nowIso()));
       },
       async submit(reviewId, draftHash) {
+        const sourceState = workspaceRef.current;
         const next = await submitApproved(
-          workspaceRef.current,
+          sourceState,
           { reviewId, draftHash },
           makeId("receipt"),
           nowIso(),
         );
+        if (workspaceRef.current !== sourceState) {
+          throw new Error(
+            "The application changed while the submission was being recorded.",
+          );
+        }
         if (!commit(next, true)) {
           throw new Error(
             "Browser storage is unavailable; no submission receipt was issued.",

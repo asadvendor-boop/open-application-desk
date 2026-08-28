@@ -39,6 +39,9 @@ function withHumanMutation(
   summary: string,
   now: string,
 ): WorkspaceState {
+  if (state.receipt || state.draft.workflowState === "submitted") {
+    throw new Error("The application was already submitted.");
+  }
   return {
     ...state,
     draft: {
@@ -166,6 +169,9 @@ export function stagePatch(
   patchId: string,
   now: string,
 ): WorkspaceState {
+  if (state.receipt || state.draft.workflowState === "submitted") {
+    throw new Error("The application was already submitted.");
+  }
   const parsed = stagePatchInputSchema.parse(input);
   const fields = parsed.changes.map((change) => change.field);
   if (new Set(fields).size !== fields.length) {
@@ -262,6 +268,9 @@ export async function prepareReview(
   reviewId: string,
   now: string,
 ): Promise<WorkspaceState> {
+  if (state.receipt || state.draft.workflowState === "submitted") {
+    throw new Error("The application was already submitted.");
+  }
   if (!state.audit || state.audit.draftRevision !== state.draft.revision) {
     throw new Error("Run a readiness audit for the current draft first.");
   }

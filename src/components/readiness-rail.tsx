@@ -4,6 +4,7 @@ import type { AuditReport } from "@/domain/application/types";
 interface ReadinessRailProps {
   audit: AuditReport | null;
   draftRevision: number;
+  submitted: boolean;
   busy: "idle" | "auditing" | "preparing";
   onAudit(): void;
   onPrepare(): void;
@@ -12,6 +13,7 @@ interface ReadinessRailProps {
 export function ReadinessRail({
   audit,
   draftRevision,
+  submitted,
   busy,
   onAudit,
   onPrepare,
@@ -21,7 +23,9 @@ export function ReadinessRail({
     ? audit.checks.filter((check) => check.status === "pass").length
     : 0;
   const blockerCount = auditIsCurrent ? audit.blockingCount : PROGRAM.requirements.length;
-  const canPrepare = Boolean(auditIsCurrent && audit?.blockingCount === 0);
+  const canPrepare = Boolean(
+    !submitted && auditIsCurrent && audit?.blockingCount === 0,
+  );
 
   return (
     <section className="rail-card readiness-card" aria-labelledby="readiness-title">

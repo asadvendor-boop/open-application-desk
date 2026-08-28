@@ -34,6 +34,12 @@ export function ApplicationEditor({
 }: ApplicationEditorProps) {
   const evidence = draft.evidence[0] ?? primaryEvidenceDefaults;
   const summaryWords = words(draft.fields.summary);
+  const revisionLabel =
+    draft.workflowState === "submitted"
+      ? "Submitted"
+      : draft.workflowState === "review"
+        ? "Review"
+        : "Draft";
 
   function updateEvidence(change: Partial<EvidenceBinding>) {
     onEvidenceChange({ ...evidence, ...change });
@@ -52,7 +58,9 @@ export function ApplicationEditor({
                 <p className="eyebrow">Application narrative</p>
                 <h2 id="narrative-title">Make the case legible.</h2>
               </div>
-              <span className="revision-chip">Draft r{draft.revision}</span>
+              <span className="revision-chip">
+                {revisionLabel} r{draft.revision}
+              </span>
             </div>
 
             <label className="field" htmlFor="project-name">

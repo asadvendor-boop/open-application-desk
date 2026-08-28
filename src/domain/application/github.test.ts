@@ -24,6 +24,30 @@ describe("parseGitHubRepositoryUrl", () => {
       parseGitHubRepositoryUrl("https://github.com/openai/openai-node/issues"),
     ).toThrow("Only public github.com repository URLs are supported");
   });
+
+  it("rejects repository URLs with credentials, ports, queries, or fragments", () => {
+    for (const value of [
+      "https://token@github.com/openai/openai-node",
+      "https://github.com:444/openai/openai-node",
+      "https://github.com/openai/openai-node?token=secret",
+      "https://github.com/openai/openai-node#readme",
+    ]) {
+      expect(() => parseGitHubRepositoryUrl(value)).toThrow(
+        "Only public github.com repository URLs are supported",
+      );
+    }
+  });
+
+  it("rejects encoded path separators in repository names", () => {
+    for (const value of [
+      "https://github.com/openai/%2Fhidden",
+      "https://github.com/openai/openai-node%2Fissues",
+    ]) {
+      expect(() => parseGitHubRepositoryUrl(value)).toThrow(
+        "Only public github.com repository URLs are supported",
+      );
+    }
+  });
 });
 
 describe("detectCommonLicenseSpdx", () => {

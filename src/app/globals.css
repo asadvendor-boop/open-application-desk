@@ -265,6 +265,20 @@ a {
   font-size: 11px;
 }
 
+.receipt-copy-fallback {
+  display: grid;
+  min-width: 0;
+  gap: 4px;
+  color: var(--rust);
+  font-size: 11px;
+}
+
+.receipt-copy-fallback code {
+  overflow-wrap: anywhere;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 10px;
+}
+
 .text-button {
   min-height: 40px;
   padding: 0;

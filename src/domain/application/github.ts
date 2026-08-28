@@ -64,8 +64,15 @@ export function parseGitHubRepositoryUrl(value: string): {
   if (
     url.protocol !== "https:" ||
     url.hostname !== "github.com" ||
+    url.username !== "" ||
+    url.password !== "" ||
+    url.port !== "" ||
+    url.search !== "" ||
+    url.hash !== "" ||
     !owner ||
     !repository ||
+    owner.includes("%") ||
+    repository.includes("%") ||
     extra
   ) {
     throw new Error(unsupportedRepositoryMessage);

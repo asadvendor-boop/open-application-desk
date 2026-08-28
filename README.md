@@ -54,6 +54,15 @@ The tool definitions are in
 runtime-validated with Zod and uses a closed JSON Schema
 (`additionalProperties: false`).
 
+The browser registration starts from the page's real model context:
+
+```ts
+const modelContext = document.modelContext;
+for (const tool of createToolDefinitions(controller)) {
+  await modelContext.registerTool(tool, { signal: lifecycle.signal });
+}
+```
+
 ## Safety and state model
 
 - The agent cannot invent missing facts, attest, apply a patch, authorize, or
@@ -73,7 +82,7 @@ runtime-validated with Zod and uses a closed JSON Schema
 Requires Node.js 22.13 or newer.
 
 ```bash
-npm install
+npm ci
 npm run dev
 ```
 

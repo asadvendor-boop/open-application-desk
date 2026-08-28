@@ -26,9 +26,10 @@ export function SubmissionReview({
   onAuthorize,
   onSubmit,
 }: SubmissionReviewProps) {
-  const [copyState, setCopyState] = useState<"idle" | "copied" | "error">(
-    "idle",
-  );
+  const [copyState, setCopyState] = useState<{
+    receiptId: string | null;
+    status: "idle" | "copied" | "error";
+  }>({ receiptId: null, status: "idle" });
 
   async function copyReceipt() {
     if (!receipt) {
@@ -47,13 +48,16 @@ export function SubmissionReview({
           2,
         ),
       );
-      setCopyState("copied");
+      setCopyState({ receiptId: receipt.id, status: "copied" });
     } catch {
-      setCopyState("error");
+      setCopyState({ receiptId: receipt.id, status: "error" });
     }
   }
 
   if (receipt) {
+    const receiptCopyState =
+      copyState.receiptId === receipt.id ? copyState.status : "idle";
+
     return (
       <section className="rail-card receipt-card" aria-labelledby="receipt-title">
         <div className="receipt-seal" aria-hidden="true">✓</div>
@@ -79,10 +83,13 @@ export function SubmissionReview({
             type="button"
             onClick={copyReceipt}
           >
-            {copyState === "copied" ? "Copied" : "Copy receipt"}
+            {receiptCopyState === "copied" ? "Copied" : "Copy receipt"}
           </button>
-          {copyState === "error" && (
-            <span role="alert">Copy failed; select the receipt values above.</span>
+          {receiptCopyState === "error" && (
+            <div className="receipt-copy-fallback" role="alert">
+              <span>Copy failed; copy the full reviewed hash below.</span>
+              <code>{receipt.draftHash}</code>
+            </div>
           )}
         </div>
       </section>

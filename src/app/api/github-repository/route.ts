@@ -128,7 +128,7 @@ export async function POST(request: Request) {
 
   try {
     const response = await fetch(
-      `https://api.github.com/repos/${repositoryPath.owner}/${repositoryPath.repository}`,
+      `https://api.github.com/repos/${encodeURIComponent(repositoryPath.owner)}/${encodeURIComponent(repositoryPath.repository)}`,
       {
         headers: {
           Accept: "application/vnd.github+json",

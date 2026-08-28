@@ -35,9 +35,10 @@ test("completes the human-controlled WebMCP journey from blockers to receipt", a
       contentType: "application/json",
       body: JSON.stringify({
         status: "verified",
-        repositoryUrl: "https://github.com/openai/openai-node",
+        repositoryUrl:
+          "https://github.com/asadvendor-boop/open-application-desk",
         isPublic: true,
-        licenseSpdx: "Apache-2.0",
+        licenseSpdx: "MIT",
         checkedAt: "2026-08-28T08:00:00.000Z",
         message: "Public repository metadata checked.",
       }),
@@ -77,12 +78,12 @@ test("completes the human-controlled WebMCP journey from blockers to receipt", a
       },
       {
         field: "liveUrl",
-        value: "https://open-application-desk.syed3000.chatgpt.site",
+        value: "https://example.com/open-application-desk",
         rationale: "Supply the deployed HTTPS experience.",
       },
       {
         field: "repositoryUrl",
-        value: "https://github.com/openai/openai-node",
+        value: "https://github.com/asadvendor-boop/open-application-desk",
         rationale: "Supply a public repository for bounded metadata checks.",
       },
     ],
@@ -113,7 +114,7 @@ test("completes the human-controlled WebMCP journey from blockers to receipt", a
     .fill("The public portal exposes the complete human-controlled workflow.");
   await page
     .getByLabel("Public evidence URL")
-    .fill("https://open-application-desk.syed3000.chatgpt.site");
+    .fill("https://example.com/open-application-desk");
   await page.getByRole("checkbox", { name: /Applicant attestation/ }).check();
 
   const updatedContext = await executeWebMcpTool<ContextResult>(
