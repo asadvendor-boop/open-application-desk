@@ -1024,7 +1024,7 @@ git add README.md LICENSE .env.example
 git commit -m "docs: publish judge start and project license"
 ```
 
-- [ ] **Step 4: Create the human-named public repository**
+- [x] **Step 4: Create the human-named public repository**
 
 Asad supplies the final slug in `WEBMCP_REPO_SLUG`:
 
