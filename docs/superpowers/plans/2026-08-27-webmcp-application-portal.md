@@ -1097,7 +1097,7 @@ git rev-list -n 1 webmcp-video-candidate
 Expected: clean status, full verification PASS, and identical HEAD/tag commits.
 Only failed acceptance criteria may be fixed after this point.
 
-- [ ] **Step 2: Write the locked 2:45-2:50 script**
+- [x] **Step 2: Write the locked 2:45-2:50 script**
 
 Use this budget:
 
@@ -1118,7 +1118,7 @@ Use this budget:
 Stay below 418 words and leave two seconds of silence. Do not mention test
 totals, architecture diagrams, or another scenario.
 
-- [ ] **Step 3: Write rubric-aligned submission copy**
+- [x] **Step 3: Write rubric-aligned submission copy**
 
 `docs/SUBMISSION_COPY.md` contains:
 
