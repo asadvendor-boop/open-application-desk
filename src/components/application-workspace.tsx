@@ -139,7 +139,7 @@ export function ApplicationWorkspace() {
       </header>
 
       <div className="origin-strip">
-        <span className="origin-strip__label">Why this exists</span>
+        <span className="origin-strip__label">For high-stakes applicants</span>
         <p>
           At my last deadline, a stale claim nearly slipped through. In a grant,
           scholarship, or accelerator application, that can cost the opportunity.
@@ -165,12 +165,13 @@ export function ApplicationWorkspace() {
         <article id="application-editor" className="editor-surface">
           <div className="editor-intro">
             <div>
-              <p className="eyebrow">Applicant workspace / live state</p>
-              <h2>One application.<br />One source of truth.</h2>
+              <p className="eyebrow">The page is the agent interface</p>
+              <h2>This form can explain itself.<br />You decide what gets submitted.</h2>
             </div>
             <p>
-              Edit normally. The portal owns the rules; WebMCP tools inspect and
-              prepare this same state, never a scraped copy.
+              Instead of scraping pixels, ChatGPT gets five typed WebMCP tools for
+              this exact draft. Native controls keep facts, changes, and
+              authorization human-owned.
             </p>
           </div>
 

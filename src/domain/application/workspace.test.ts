@@ -232,6 +232,75 @@ describe("workspace authority boundaries", () => {
 
     expect(repeated.receipt?.id).toBe("receipt-1");
     expect(repeated.draft.workflowState).toBe("submitted");
+    expect(repeated.receipt?.journeyProof).toEqual({
+      initialBlockingCount: 0,
+      finalBlockingCount: 0,
+      finalReadyCount: 10,
+      requirementCount: 10,
+    });
+  });
+
+  it("omits before-and-after proof when a legacy baseline is unknowable", async () => {
+    const ready = {
+      ...recordAudit(createWorkspace(createValidDraft()), passingAudit()),
+      baselineAudit: null,
+      baselineAuditTracked: false,
+    };
+    const reviewed = await prepareReview(ready, "review-1", NOW);
+    const authorized = authorizeReview(reviewed, "review-1", LATER);
+    const submitted = await submitApproved(
+      authorized,
+      { reviewId: "review-1", draftHash: authorized.review!.draftHash },
+      "receipt-1",
+      LATER,
+    );
+
+    expect(submitted.receipt?.journeyProof).toBeUndefined();
+  });
+
+  it("fails closed when a persisted review has no current passing audit", async () => {
+    const ready = recordAudit(createWorkspace(createValidDraft()), passingAudit());
+    const reviewed = await prepareReview(ready, "review-1", NOW);
+    const authorized = authorizeReview(reviewed, "review-1", LATER);
+
+    await expect(
+      submitApproved(
+        { ...authorized, audit: null },
+        { reviewId: "review-1", draftHash: authorized.review!.draftHash },
+        "receipt-1",
+        LATER,
+      ),
+    ).rejects.toThrow("current passing audit");
+  });
+
+  it("binds a seven-to-zero journey to the submitted receipt", async () => {
+    const firstAudit = {
+      ...passingAudit(),
+      blockingCount: 7,
+      checks: passingAudit().checks.map((check, index) => ({
+        ...check,
+        status: index < 7 ? ("block" as const) : ("pass" as const),
+      })),
+    };
+    const first = recordAudit(createWorkspace(createValidDraft()), firstAudit);
+    const final = recordAudit(first, passingAudit());
+    const reviewed = await prepareReview(final, "review-1", NOW);
+    const authorized = authorizeReview(reviewed, "review-1", LATER);
+    const submitted = await submitApproved(
+      authorized,
+      { reviewId: "review-1", draftHash: authorized.review!.draftHash },
+      "receipt-1",
+      LATER,
+    );
+
+    expect(final.baselineAudit).toEqual(firstAudit);
+    expect(final.audit).toEqual(passingAudit());
+    expect(submitted.receipt?.journeyProof).toEqual({
+      initialBlockingCount: 7,
+      finalBlockingCount: 0,
+      finalReadyCount: 10,
+      requirementCount: 10,
+    });
   });
 
   it("does not prepare another review after the application was submitted", async () => {

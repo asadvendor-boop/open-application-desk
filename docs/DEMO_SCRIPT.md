@@ -1,6 +1,7 @@
 # Open Application Desk — locked demo script
 
-**Target duration:** 2:46, including two seconds of silence after the opening.
+**Target duration:** 2:48. The opening uses one clearly labeled cold-open result,
+then returns to the fresh sample for one uninterrupted live journey.
 
 **Recording gate:** Use only the final no-login production URL after its
 WebMCP registration and golden journey have been verified. Do not record this
@@ -10,16 +11,17 @@ human action visible.
 
 | Time | Screen proof | Narration |
 | --- | --- | --- |
-| 0:00–0:12 | Open on the incomplete application and several visible tabs or links. Pause briefly after “opportunity.” | At my last application deadline, rules were in one tab, evidence links in another, and my draft in a third. A stale claim nearly slipped through—and could have cost the opportunity. |
-| 0:12–0:22 | Return to the portal overview, with the form, readiness rail, and evidence area together. | Open Application Desk puts those things in one shared application state. WebMCP lets an agent help without turning a deadline into blind automation. |
-| 0:22–0:32 | Show the connected WebMCP status, then ask ChatGPT: “Read this application, audit it, and do not edit or submit anything.” | Five WebMCP tools connect ChatGPT to this actual draft. I ask it to inspect, not edit. |
-| 0:32–0:49 | Show `get_application_context`, then `audit_application`; hold on 3/10 readiness, seven concrete blockers, and unchanged draft revision. | It reads the exact rules and draft behind this page, then runs deterministic checks. Seven blockers appear: a too-long summary, no audience fact, missing public evidence, and no attestation. The draft is unchanged. |
-| 0:49–1:04 | Focus the missing audience-and-problem field and its audit reason. | One blocker needs a real answer: who is this for and what difficulty do they face? The agent cannot truthfully infer it. I own that fact. |
-| 1:04–1:26 | Call `stage_draft_patch`; show the patch drawer, old/new values, and native **Apply proposed changes** button. Apply it yourself. | The agent can propose a concise, allowlisted patch. The old and new text sit side by side, and the change exists only in this drawer. I use the native Apply proposed changes control. The agent’s tool ends at proposal. |
-| 1:26–1:49 | Enter the human-owned audience fact, add the public evidence, check the attestation, and show a green re-audit. | Now I supply the missing audience fact myself, link public evidence, and attest that the application reflects my claim. The agent audits the updated revision. The gate turns green, but green is readiness, not acceptance. |
-| 1:49–2:12 | Show `prepare_submission`, the exact draft hash, native **Authorize exact application**, then `submit_approved_application` and its receipt. | `prepare_submission` creates a five-minute review bound to this exact draft hash. I use the native authorization control; only then can the agent submit that matching review. One receipt records the reviewed hash and submission time. |
-| 2:12–2:32 | Show the five registration names in ChatGPT, then `src/webmcp/register-tools.ts` and a strict-schema excerpt. | There are exactly five registrations, all with strict schemas and the same shared controller as the form. The source shows `registerTool`; the experience shows the human boundaries working. |
-| 2:32–2:46 | End on the receipt and the human-controlled workflow summary. | A stale claim nearly cost my submission. Open Application Desk lets ChatGPT find blockers, stage the fix, and submit only the exact version I approve. |
+| 0:00–0:09 | **Cold open:** show the real audited sample at `3/10 ready` and `7 blockers remain`, with **For high-stakes applicants** visible. Keep both numbers legible. | As an applicant racing a deadline, I nearly submitted a stale claim. This portal found seven blockers before they cost me the opportunity. |
+| 0:09–0:16 | Cut once to a fresh reset with a small “30 seconds earlier” label. Show the personal origin strip and **WebMCP connected** status. | So I built a form that can explain itself—but only I can authorize submission. |
+| 0:16–0:30 | Ask ChatGPT: “Read this application, audit it, and do not edit or submit anything.” Show `get_application_context` and `audit_application`; the live result must be visible by 0:28. | ChatGPT discovers five typed WebMCP tools and audits this exact page. The gate returns three of ten ready, with no draft edit. |
+| 0:30–0:47 | Hold on seven concrete blockers and unchanged draft revision. | The checks are deterministic: the summary is too long, the audience fact is missing, public evidence is absent, and I have not attested. The draft is unchanged. |
+| 0:47–1:01 | Focus the missing audience-and-problem field and its audit reason. | One blocker needs a real answer: who is this for and what difficulty do they face? The agent cannot truthfully invent it. I own that fact. |
+| 1:01–1:24 | Call `stage_draft_patch` with the concise summary, deployed HTTPS URL, and public repository URL. Show all three old/new values and the native **Apply proposed changes** button. Review and apply them yourself. | The agent proposes three allowlisted fields: a shorter summary and the two public project links. I review every value; the draft stays untouched until I use the native Apply control. The tool ends at proposal. |
+| 1:24–1:47 | Enter the human-owned audience fact, add public evidence, check attestation, and show the green re-audit. | I supply the missing audience fact, link public evidence, and attest to my claim. A fresh audit turns the exact revision green: ten of ten ready, zero blockers. |
+| 1:47–2:10 | Show `prepare_submission`, the exact draft hash, native **Authorize exact application**, then `submit_approved_application`. | Preparation creates a five-minute review bound to this draft hash. I authorize that exact artifact in the page; only then can the agent submit it. |
+| 2:10–2:29 | Hold on the receipt’s measured journey: `7 blockers caught`, `10 / 10 ready`, `0 blockers remain`, and the reviewed hash. | The receipt now binds the visible result: seven blockers caught, zero remaining, and the exact reviewed hash submitted once. That is demonstrated impact, not an acceptance promise. |
+| 2:29–2:40 | Show the five registration names in ChatGPT, then `src/webmcp/register-tools.ts` and a strict-schema excerpt. | Five strict registrations share the same controller as the form. WebMCP turns the page itself into the agent interface—not another chatbot or click bot. |
+| 2:40–2:48 | End on the receipt and origin strip. | Open Application Desk lets agents prepare the application while applicants keep the facts, the changes, and final authorization. |
 
 ## Rehearsal procedure
 
@@ -32,9 +34,12 @@ human action visible.
 3. Record the final take only after both rehearsals pass. Watch the exported
    video once with sound, verify captions, then check the duration is at least
    165 and under 180 seconds before uploading it publicly.
+4. Run the exported video's first 30 seconds through the blind comprehension
+   protocol in `docs/RECORDING_VALIDATION.md`. Do not count the project owner or
+   anyone who already knows the product.
 
 ## Narration count
 
-The narration above is **291 words**, below the 418-word cap. The time budget
-intentionally reserves space for visible tool calls, human actions, and the
-two-second opening pause.
+The narration above is **269 words** across a 2:48 target. Recount it after any
+recording edit; spoken pacing must remain natural and the result must still be
+visible by second 28.

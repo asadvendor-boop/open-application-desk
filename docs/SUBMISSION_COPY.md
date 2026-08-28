@@ -6,8 +6,8 @@ Open Application Desk
 
 ## Elevator pitch
 
-A human-controlled WebMCP application workspace: agents audit and prepare;
-applicants own facts, changes, and submission.
+The application form that can explain and audit itself with ChatGPT—while its
+WebMCP tools cannot apply changes or authorize submission.
 
 ## Description
 
@@ -41,6 +41,21 @@ That means the agent sees the same draft and requirements as the applicant,
 without a hidden agent-only workflow or an embedded language model deciding
 whether a consequential action is safe.
 
+### What is new
+
+This is not an autofill bot, a chatbot beside a form, or an agent imitating
+clicks. Open Application Desk treats the webpage itself as a collaboration
+protocol. A compatible agent can discover the page's typed, stateful
+capabilities, while the application reuses its existing rules, live state, and
+native human controls. The form can explain its requirements, expose its
+blockers, stage a bounded change, and bind submission to the artifact the person
+actually reviewed.
+
+That suggests a broader future for the open web: sites do not need a separate
+private integration for every assistant, and agents do not need to guess at
+pixels. A webpage can publish exactly what an agent may do while keeping the
+human boundaries visible in the same experience.
+
 ### A better application experience
 
 The applicant sees concrete blockers, the exact proposed diff, and the exact
@@ -66,6 +81,18 @@ authorizes the reviewed artifact.
 That division makes collaborative submission work more legible than detached
 chat or brittle UI automation: the agent can help across the complete journey,
 while a person retains factual and consequential authority at every boundary.
+
+### Demonstrated impact
+
+The reference journey starts at **3/10 ready with seven blocking requirements**.
+The WebMCP audit changes zero application fields. After one staged proposal and
+the applicant's own factual inputs, the exact revision reaches **10/10 ready
+with zero blockers**. The final receipt records that before/after result and the
+reviewed SHA-256 draft hash.
+
+Those figures are produced by the visible deployed journey and its automated
+browser test. They are not estimates of time saved, claims of external adoption,
+or promises that an application will be accepted.
 
 ### How it works
 

@@ -960,6 +960,57 @@ a {
   box-shadow: 0 0 0 6px rgba(31, 117, 86, 0.11);
 }
 
+.journey-proof {
+  margin-top: 18px;
+  padding: 15px;
+  border: 1px solid rgba(31, 117, 86, 0.32);
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.journey-proof > .eyebrow {
+  color: var(--pine);
+}
+
+.journey-proof dl {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin: 11px 0 0;
+}
+
+.journey-proof dl > div {
+  min-width: 0;
+  padding-left: 10px;
+  border-left: 2px solid rgba(31, 117, 86, 0.4);
+}
+
+.journey-proof dt {
+  color: var(--ink-soft);
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.journey-proof dd {
+  margin: 3px 0 0;
+  color: var(--ink);
+  font-family: var(--font-source-serif), Georgia, serif;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.journey-proof dd > span {
+  display: block;
+  margin-top: 3px;
+  color: var(--pine);
+  font-family: var(--font-manrope), Manrope, "Helvetica Neue", sans-serif;
+  font-size: 10px;
+  font-weight: 750;
+}
+
 .activity-card {
   box-shadow: 0 15px 44px rgba(36, 44, 58, 0.08);
 }
@@ -1352,6 +1403,7 @@ a {
 
   .review-facts,
   .receipt-grid,
+  .journey-proof dl,
   .patch-diff__grid {
     grid-template-columns: 1fr;
   }

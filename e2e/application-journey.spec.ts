@@ -180,6 +180,9 @@ test("completes the human-controlled WebMCP journey from blockers to receipt", a
     page.getByRole("heading", { name: "Submission receipt" }),
   ).toBeVisible();
   await expect(page.getByTitle(prepared.draftHash)).toBeVisible();
+  await expect(page.getByText("7 blockers caught")).toBeVisible();
+  await expect(page.getByText("10 / 10 ready")).toBeVisible();
+  await expect(page.getByText("0 blockers remain")).toBeVisible();
   await expect(page.getByText("Submitted", { exact: true })).toBeVisible();
   await expect(
     page.getByRole("heading", { name: "Proposed change" }),
@@ -191,6 +194,12 @@ test("completes the human-controlled WebMCP journey from blockers to receipt", a
     path: "output/playwright/day2-submitted.png",
     animations: "disabled",
   });
+
+  await page.reload();
+  await expect(page.getByText("7 blockers caught")).toBeVisible();
+  await expect(page.getByText("10 / 10 ready")).toBeVisible();
+  await expect(page.getByText("0 blockers remain")).toBeVisible();
+  await expect(page.getByTitle(prepared.draftHash)).toBeVisible();
 });
 
 test("reconciles concurrent submissions from two Chromium tabs to one receipt", async ({

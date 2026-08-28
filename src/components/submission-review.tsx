@@ -43,6 +43,9 @@ export function SubmissionReview({
             reviewId: receipt.reviewId,
             draftHash: receipt.draftHash,
             submittedAt: receipt.submittedAt,
+            ...(receipt.journeyProof
+              ? { journeyProof: receipt.journeyProof }
+              : {}),
           },
           null,
           2,
@@ -67,6 +70,38 @@ export function SubmissionReview({
           Recorded against review <strong>{receipt.reviewId}</strong>. Repeating the
           same approved submission returns this receipt instead of duplicating work.
         </p>
+        {receipt.journeyProof && (
+          <div className="journey-proof" aria-label="Measured journey outcome">
+            <p className="eyebrow">Measured in this browser</p>
+            <dl>
+              <div>
+                <dt>Before</dt>
+                <dd>
+                  {receipt.journeyProof.initialBlockingCount} blocker
+                  {receipt.journeyProof.initialBlockingCount === 1 ? "" : "s"} caught
+                </dd>
+              </div>
+              <div>
+                <dt>After</dt>
+                <dd>
+                  {receipt.journeyProof.finalReadyCount} /{" "}
+                  {receipt.journeyProof.requirementCount} ready
+                  <span>
+                    {receipt.journeyProof.finalBlockingCount} blocker
+                    {receipt.journeyProof.finalBlockingCount === 1 ? "" : "s"}{" "}
+                    {receipt.journeyProof.finalBlockingCount === 1
+                      ? "remains"
+                      : "remain"}
+                  </span>
+                </dd>
+              </div>
+              <div>
+                <dt>Proof</dt>
+                <dd>Exact reviewed hash</dd>
+              </div>
+            </dl>
+          </div>
+        )}
         <dl className="receipt-grid">
           <div>
             <dt>Receipt</dt>

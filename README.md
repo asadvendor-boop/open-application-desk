@@ -6,6 +6,11 @@ link, and several open tabs. A person retains factual, attestation, patch-apply,
 authorization, and submission authority; an agent gets structured access to the
 same live draft.
 
+The creative premise is simple: **the form can explain and audit itself, while
+its WebMCP tools cannot apply changes, attest to facts, or authorize
+submission.** This is not a chatbot embedded beside a form or an agent imitating
+clicks. The page itself publishes a typed collaboration surface through WebMCP.
+
 **Production URL:** [open-application-desk.syed3000.chatgpt.site](https://open-application-desk.syed3000.chatgpt.site)
 
 ## Judge in 90 seconds
@@ -21,9 +26,19 @@ same live draft.
    agent to audit and prepare an exact review.
 6. Use the native **Authorize exact application** control, then ask the agent to
    submit the matching review ID and draft hash. The application records one
-   receipt bound to that reviewed hash.
+   receipt bound to that reviewed hash, including the measured journey from the
+   first audit to the final gate.
 
 Use **Reset sample** for a fresh browser-local workspace.
+
+## Demonstrated outcome
+
+The reproducible reference journey begins at **3/10 ready with seven blockers**
+and ends at **10/10 ready with zero blockers**. The initial audit edits zero
+application fields; proposed changes remain staged until the applicant applies
+them. The final receipt records the initial blocker count, final readiness, and
+exact reviewed draft hash. These are measured properties of the sample journey,
+not claims about time saved, acceptance odds, or external adoption.
 
 ## Why WebMCP
 

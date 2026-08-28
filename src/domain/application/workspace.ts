@@ -70,6 +70,8 @@ export function createWorkspace(draft: ApplicationDraft): WorkspaceState {
       evidence: draft.evidence.map((item) => ({ ...item })),
     },
     audit: null,
+    baselineAudit: null,
+    baselineAuditTracked: true,
     stagedPatch: null,
     review: null,
     receipt: null,
@@ -84,6 +86,9 @@ export function recordAudit(
   return {
     ...state,
     audit,
+    baselineAudit: state.baselineAuditTracked
+      ? (state.baselineAudit ?? audit)
+      : null,
     activity: [
       ...state.activity,
       activity(
@@ -371,6 +376,14 @@ export async function submitApproved(
   if ((await hashDraft(state.draft)) !== review.draftHash) {
     throw new Error("The current draft differs from the authorized snapshot.");
   }
+  const audit = state.audit;
+  if (
+    !audit ||
+    audit.draftRevision !== state.draft.revision ||
+    audit.blockingCount > 0
+  ) {
+    throw new Error("A current passing audit is required before submission.");
+  }
 
   return {
     ...state,
@@ -381,6 +394,18 @@ export async function submitApproved(
       reviewId: review.id,
       draftHash: review.draftHash,
       submittedAt: now,
+      ...(state.baselineAuditTracked && state.baselineAudit
+        ? {
+            journeyProof: {
+              initialBlockingCount: state.baselineAudit.blockingCount,
+              finalBlockingCount: audit.blockingCount,
+              finalReadyCount: audit.checks.filter(
+                (check) => check.status === "pass",
+              ).length,
+              requirementCount: audit.checks.length,
+            },
+          }
+        : {}),
     },
     activity: [
       ...state.activity,

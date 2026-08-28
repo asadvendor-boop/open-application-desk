@@ -86,6 +86,12 @@ export interface SubmissionReceipt {
   reviewId: string;
   draftHash: string;
   submittedAt: string;
+  journeyProof?: {
+    initialBlockingCount: number;
+    finalBlockingCount: number;
+    finalReadyCount: number;
+    requirementCount: number;
+  };
 }
 
 export interface ActivityEntry {
@@ -100,6 +106,8 @@ export interface WorkspaceState {
   version: 1;
   draft: ApplicationDraft;
   audit: AuditReport | null;
+  baselineAudit: AuditReport | null;
+  baselineAuditTracked: boolean;
   stagedPatch: StagedPatch | null;
   review: ReviewSnapshot | null;
   receipt: SubmissionReceipt | null;

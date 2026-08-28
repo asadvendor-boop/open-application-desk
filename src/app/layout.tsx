@@ -18,7 +18,7 @@ const sourceSerif = Source_Serif_4({
 export const metadata: Metadata = {
   title: "Open Application Desk",
   description:
-    "A human-led, WebMCP-ready application portal for exact review and submission.",
+    "A WebMCP application that can explain and audit itself while the applicant owns every change and submission.",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

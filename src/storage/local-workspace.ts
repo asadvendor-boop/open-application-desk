@@ -89,6 +89,15 @@ const receiptSchema = z
     reviewId: z.string(),
     draftHash: z.string(),
     submittedAt: z.string(),
+    journeyProof: z
+      .object({
+        initialBlockingCount: z.number().int().nonnegative(),
+        finalBlockingCount: z.number().int().nonnegative(),
+        finalReadyCount: z.number().int().nonnegative(),
+        requirementCount: z.number().int().positive(),
+      })
+      .strict()
+      .optional(),
   })
   .strict();
 
@@ -107,6 +116,8 @@ export const workspaceStateSchema = z
     version: z.literal(1),
     draft: draftSchema,
     audit: auditSchema.nullable(),
+    baselineAudit: auditSchema.nullable().default(null),
+    baselineAuditTracked: z.boolean().default(false),
     stagedPatch: patchSchema.nullable(),
     review: reviewSchema.nullable(),
     receipt: receiptSchema.nullable(),

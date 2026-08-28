@@ -21,6 +21,12 @@ describe("SubmissionReview receipt", () => {
           draftHash:
             "64d264ec3749f0bf1a3143cf34c0ba789f2bf4c2e9f31c00461727ac461727ac",
           submittedAt: "2026-08-28T08:00:00.000Z",
+          journeyProof: {
+            initialBlockingCount: 7,
+            finalBlockingCount: 0,
+            finalReadyCount: 10,
+            requirementCount: 10,
+          },
         }}
         submitting={false}
         onAuthorize={() => undefined}
@@ -31,6 +37,9 @@ describe("SubmissionReview receipt", () => {
     await user.click(screen.getByRole("button", { name: "Copy receipt" }));
 
     expect(await screen.findByText("Copied")).toBeInTheDocument();
+    expect(screen.getByText("7 blockers caught")).toBeInTheDocument();
+    expect(screen.getByText("10 / 10 ready")).toBeInTheDocument();
+    expect(screen.getByText("Exact reviewed hash")).toBeInTheDocument();
   });
 
   it("resets copy feedback when a different receipt is shown", async () => {
