@@ -912,7 +912,7 @@ git commit -m "feat: expose human-controlled WebMCP tools"
 - Consumes: live UI and five registered tools.
 - Produces: browser proof of discovery, staged mutation, human approval, exact review, and receipt.
 
-- [ ] **Step 1: Install the browser-side WebMCP test double**
+- [x] **Step 1: Install the browser-side WebMCP test double**
 
 Use `page.addInitScript()` before navigation:
 
@@ -931,7 +931,7 @@ Object.defineProperty(document, "modelContext", {
 Object.defineProperty(window, "__registeredWebMcpTools", { value: tools });
 ```
 
-- [ ] **Step 2: Write and run the failing registration test**
+- [x] **Step 2: Write and run the failing registration test**
 
 Verify `WebMCP connected`, all five names, and lifecycle cleanup on navigation.
 
@@ -939,7 +939,7 @@ Run: `npm run test:e2e -- e2e/webmcp-registration.spec.ts`
 
 Expected: FAIL until UI status and test bridge are wired.
 
-- [ ] **Step 3: Write and run the failing assisted journey**
+- [x] **Step 3: Write and run the failing assisted journey**
 
 The test routes `/api/github-repository` to a deterministic verified response,
 then executes context, audit, stage patch, native Apply, human-only audience and
@@ -951,26 +951,26 @@ Run: `npm run test:e2e -- e2e/application-journey.spec.ts`
 
 Expected: FAIL at the first incomplete judge transition.
 
-- [ ] **Step 4: Complete only journey-required UX states**
+- [x] **Step 4: Complete only journey-required UX states**
 
 Provide connected/unavailable/error status; blocking and passing counts; exact
 patch diff; native Apply/Reject/Authorize/Reset; concise activity; final receipt
 with 12-character hash preview and copy control. No essential information may be
 hover-only.
 
-- [ ] **Step 5: Inspect recording-size screenshots**
+- [x] **Step 5: Inspect recording-size screenshots**
 
 Capture Draft, Patch Review, and Submitted at 1440×900. Inspect every image and
 fix clipping, contrast, hierarchy, horizontal scroll, and unreadable status.
 Do not add panels.
 
-- [ ] **Step 6: Run the complete local release gate**
+- [x] **Step 6: Run the complete local release gate**
 
 Run: `npm run verify`
 
 Expected: lint, typecheck, Vitest, build, and Playwright PASS.
 
-- [ ] **Step 7: Commit browser proof**
+- [x] **Step 7: Commit browser proof**
 
 ```bash
 git add e2e src playwright.config.ts

@@ -1,3 +1,7 @@
+"use client";
+
+import { useState } from "react";
+
 import type {
   ReviewSnapshot,
   SubmissionReceipt,
@@ -22,6 +26,33 @@ export function SubmissionReview({
   onAuthorize,
   onSubmit,
 }: SubmissionReviewProps) {
+  const [copyState, setCopyState] = useState<"idle" | "copied" | "error">(
+    "idle",
+  );
+
+  async function copyReceipt() {
+    if (!receipt) {
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(
+        JSON.stringify(
+          {
+            receiptId: receipt.id,
+            reviewId: receipt.reviewId,
+            draftHash: receipt.draftHash,
+            submittedAt: receipt.submittedAt,
+          },
+          null,
+          2,
+        ),
+      );
+      setCopyState("copied");
+    } catch {
+      setCopyState("error");
+    }
+  }
+
   if (receipt) {
     return (
       <section className="rail-card receipt-card" aria-labelledby="receipt-title">
@@ -42,6 +73,18 @@ export function SubmissionReview({
             <dd title={receipt.draftHash}>{shortHash(receipt.draftHash)}</dd>
           </div>
         </dl>
+        <div className="receipt-actions">
+          <button
+            className="button button--quiet"
+            type="button"
+            onClick={copyReceipt}
+          >
+            {copyState === "copied" ? "Copied" : "Copy receipt"}
+          </button>
+          {copyState === "error" && (
+            <span role="alert">Copy failed; select the receipt values above.</span>
+          )}
+        </div>
       </section>
     );
   }

@@ -5,7 +5,13 @@ export const httpsUrlSchema = z
   .string()
   .url()
   .max(500)
-  .refine((value) => new URL(value).protocol === "https:", {
+  .refine((value) => {
+    try {
+      return new URL(value).protocol === "https:";
+    } catch {
+      return false;
+    }
+  }, {
     message: "URL must use HTTPS",
   });
 

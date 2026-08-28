@@ -55,4 +55,32 @@ describe("auditApplication", () => {
     expect(repositoryCheck?.status).toBe("block");
     expect(repositoryCheck?.message).toMatch(/unverified/i);
   });
+
+  it("turns blank and malformed public URLs into blockers instead of throwing", () => {
+    const draft = createValidDraft();
+    draft.fields.liveUrl = "";
+    draft.evidence[0]!.url = "not a URL";
+
+    expect(() =>
+      auditApplication(
+        draft,
+        verifiedRepository,
+        "2026-08-27T01:00:00.000Z",
+      ),
+    ).not.toThrow();
+
+    const report = auditApplication(
+      draft,
+      verifiedRepository,
+      "2026-08-27T01:00:00.000Z",
+    );
+    expect(
+      report.checks.find((check) => check.requirementId === "live_url_https")
+        ?.status,
+    ).toBe("block");
+    expect(
+      report.checks.find((check) => check.requirementId === "claim_evidence")
+        ?.status,
+    ).toBe("block");
+  });
 });

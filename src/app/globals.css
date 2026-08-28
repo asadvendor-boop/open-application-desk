@@ -252,6 +252,19 @@ a {
   animation: protocolPulse 2s ease-in-out infinite;
 }
 
+.receipt-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.receipt-actions span {
+  color: var(--rust);
+  font-size: 11px;
+}
+
 .text-button {
   min-height: 40px;
   padding: 0;
@@ -1119,10 +1132,16 @@ a {
 }
 
 .patch-actions {
+  position: sticky;
+  z-index: 2;
+  bottom: 0;
   display: flex;
   justify-content: flex-end;
   gap: 10px;
   margin-top: 19px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+  background: var(--paper);
 }
 
 .loading-workspace {
