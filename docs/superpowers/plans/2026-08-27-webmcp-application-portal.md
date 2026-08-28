@@ -361,12 +361,13 @@ git commit -m "chore: establish WebMCP portal foundation"
 - Create: `src/test/fixtures.ts`
 - Test: `src/domain/application/github.test.ts`
 - Test: `src/domain/application/audit.test.ts`
+- Test: `src/app/api/github-repository/route.test.ts`
 
 **Interfaces:**
 - Consumes: `ApplicationDraft`, `AuditReport`, and `PROGRAM`.
 - Produces: `parseGitHubRepositoryUrl()`, `RepositoryVerification`, `auditApplication()`, and `POST /api/github-repository`.
 
-- [ ] **Step 1: Write failing parser and audit tests**
+- [x] **Step 1: Write failing parser and audit tests**
 
 ```ts
 it("accepts one public repository path and rejects non-GitHub hosts", () => {
@@ -388,13 +389,13 @@ it("passes a complete draft with a public licensed repository", () => {
 });
 ```
 
-- [ ] **Step 2: Verify the tests fail**
+- [x] **Step 2: Verify the tests fail**
 
 Run: `npm test -- src/domain/application/github.test.ts src/domain/application/audit.test.ts`
 
 Expected: FAIL because parser, audit, and fixtures are absent.
 
-- [ ] **Step 3: Implement strict schemas**
+- [x] **Step 3: Implement strict schemas**
 
 ```ts
 export const repositoryRequestSchema = z.object({
@@ -420,7 +421,7 @@ binding, a summary under 90 words, and `attested: true`.
 verifiedRepository, "2026-08-27T01:00:00.000Z")` so later authority tests use the
 same check set as production.
 
-- [ ] **Step 4: Implement bounded GitHub parsing**
+- [x] **Step 4: Implement bounded GitHub parsing**
 
 ```ts
 export interface RepositoryVerification {
@@ -442,7 +443,7 @@ export function parseGitHubRepositoryUrl(value: string) {
 }
 ```
 
-- [ ] **Step 5: Implement the deterministic audit**
+- [x] **Step 5: Implement the deterministic audit**
 
 Return exactly one check per requirement. Required strings pass after trimming;
 summary uses whitespace word count; URLs must parse as HTTPS; repository and
@@ -450,7 +451,7 @@ license pass only for `status: "verified"`; unavailable metadata is a blocker
 whose message says `unverified`; claim evidence requires a non-empty claim and
 HTTPS URL; attestation remains human-owned and blocking.
 
-- [ ] **Step 6: Implement the GitHub metadata route**
+- [x] **Step 6: Implement the GitHub metadata route**
 
 Parse the request with `repositoryRequestSchema`, derive owner/repository, and
 call only the public GitHub API:
@@ -471,13 +472,13 @@ Return normalized metadata. Return `not_found` for 404 and `unavailable` for
 rate limits, timeouts, invalid JSON, and other failures. Never fetch the supplied
 URL directly or return upstream body text.
 
-- [ ] **Step 7: Run the audit gates**
+- [x] **Step 7: Run the audit gates**
 
 Run: `npm test -- src/domain/application/github.test.ts src/domain/application/audit.test.ts && npm test && npm run typecheck`
 
 Expected: all commands PASS.
 
-- [ ] **Step 8: Commit deterministic auditing**
+- [x] **Step 8: Commit deterministic auditing**
 
 ```bash
 git add src/domain src/app/api src/test
