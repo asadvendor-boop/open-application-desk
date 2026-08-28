@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
@@ -23,8 +23,31 @@ function installSubmissionLock() {
   });
 }
 
+function installModelContext() {
+  const tools = new Map<string, WebMCP.ModelContextTool>();
+  Object.defineProperty(document, "modelContext", {
+    configurable: true,
+    value: {
+      registerTool: vi.fn(async (tool: WebMCP.ModelContextTool, options) => {
+        tools.set(tool.name, tool);
+        options?.signal?.addEventListener(
+          "abort",
+          () => {
+            if (tools.get(tool.name) === tool) {
+              tools.delete(tool.name);
+            }
+          },
+          { once: true },
+        );
+      }),
+    } as unknown as WebMCP.ModelContext,
+  });
+  return tools;
+}
+
 afterEach(() => {
   Reflect.deleteProperty(navigator, "locks");
+  Reflect.deleteProperty(document, "modelContext");
 });
 
 function PatchHarness() {
@@ -126,5 +149,34 @@ describe("application workspace", () => {
     expect(
       screen.queryByRole("button", { name: "Prepare exact review" }),
     ).not.toBeInTheDocument();
+  });
+
+  it("updates the status bar after a WebMCP audit succeeds", async () => {
+    const tools = installModelContext();
+    saveWorkspace(createWorkspace(createValidDraft()));
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        new Response(JSON.stringify(verifiedRepository), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        }),
+      ),
+    );
+
+    render(<ApplicationWorkspace />);
+    await waitFor(() => expect(tools.get("audit_application")).toBeDefined());
+    const auditTool = tools.get("audit_application");
+    if (!auditTool) {
+      throw new Error("Expected audit_application to register.");
+    }
+
+    await act(async () => {
+      await auditTool.execute({}, { signal: new AbortController().signal });
+    });
+
+    expect(
+      await screen.findByText("Draft r3 passed all 10 deterministic checks."),
+    ).toBeInTheDocument();
   });
 });

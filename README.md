@@ -6,8 +6,7 @@ link, and several open tabs. A person retains factual, attestation, patch-apply,
 authorization, and submission authority; an agent gets structured access to the
 same live draft.
 
-**Production URL:** pending deployment of this exact WebMCP candidate. The
-previous Day 1 manual deployment is deliberately not presented as this release.
+**Production URL:** [open-application-desk.syed3000.chatgpt.site](https://open-application-desk.syed3000.chatgpt.site)
 
 ## Judge in 90 seconds
 
@@ -66,8 +65,10 @@ for (const tool of createToolDefinitions(controller)) {
 ## Safety and state model
 
 - The agent can only stage an allowlisted text proposal. It cannot apply a
-  patch, attest, authorize, or submit; the applicant remains responsible for
-  reviewing proposed text and supplying factual claims.
+  patch, attest, or authorize; the applicant remains responsible for reviewing
+  proposed text and supplying factual claims.
+- The agent may call `submit_approved_application` only after the applicant has
+  natively authorized that exact review ID and draft hash.
 - A human edit invalidates any current audit and review; a human must re-audit
   and re-authorize.
 - The review is bound to a canonical SHA-256 draft hash and expires after five
@@ -90,8 +91,8 @@ npm run dev
 ```
 
 Open `http://127.0.0.1:3000`. In an unsupported browser, Manual mode remains
-fully usable; use ChatGPT's in-app browser or Chrome with WebMCP testing enabled
-to discover the tools.
+fully usable; use ChatGPT's in-app browser or Chrome 149+ with WebMCP testing
+enabled to discover the tools.
 
 ```bash
 npm run verify

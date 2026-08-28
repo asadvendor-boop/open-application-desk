@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 
+import type { AuditReport } from "@/domain/application/types";
 import type { WorkspaceController } from "./use-application-workspace";
 import { registerWebMcpTools } from "@/webmcp/register-tools";
 
@@ -19,6 +20,7 @@ function initialConnection(): WebMcpConnection {
 
 export function useWebMcpTools(
   controller: WorkspaceController,
+  onAuditCompleted?: (report: AuditReport) => void,
 ): WebMcpConnection {
   const [connection, setConnection] =
     useState<WebMcpConnection>(initialConnection);
@@ -32,7 +34,9 @@ export function useWebMcpTools(
     const lifecycle = new AbortController();
     let disposeRegistration: (() => void) | undefined;
 
-    void registerWebMcpTools(controller, modelContext, lifecycle.signal)
+    void registerWebMcpTools(controller, modelContext, lifecycle.signal, {
+      onAuditCompleted,
+    })
       .then((registration) => {
         if (lifecycle.signal.aborted) {
           registration.dispose();
@@ -51,7 +55,7 @@ export function useWebMcpTools(
       lifecycle.abort();
       disposeRegistration?.();
     };
-  }, [controller]);
+  }, [controller, onAuditCompleted]);
 
   return connection;
 }

@@ -24,6 +24,10 @@ Open Application Desk is a browser-local application workspace where a person
 and an agent work on the same live draft, while the portal—not the agent—keeps
 authority over rules, state, validation, and submission.
 
+The same interaction model fits grants, accelerators, scholarships, admissions,
+procurement, fellowships, and competitions: any application where a stale claim
+or unintended submission can cost an opportunity.
+
 ### Why WebMCP is the right fit
 
 WebMCP exposes the smallest useful set of structured actions from the actual

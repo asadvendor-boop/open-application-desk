@@ -1,11 +1,15 @@
 import type { WorkspaceController } from "@/hooks/use-application-workspace";
-import { createToolDefinitions } from "./tool-executors";
+import {
+  createToolDefinitions,
+  type ToolExecutionObserver,
+} from "./tool-executors";
 
 export async function registerWebMcpTools(
   controller: WorkspaceController,
   modelContext: WebMCP.ModelContext | undefined =
     typeof document === "undefined" ? undefined : document.modelContext,
   registrationSignal?: AbortSignal,
+  observer?: ToolExecutionObserver,
 ) {
   if (!modelContext || typeof modelContext.registerTool !== "function") {
     return { supported: false as const, dispose() {} };
@@ -21,7 +25,7 @@ export async function registerWebMcpTools(
     });
   }
   try {
-    for (const tool of createToolDefinitions(controller)) {
+    for (const tool of createToolDefinitions(controller, observer)) {
       lifecycle.signal.throwIfAborted();
       await modelContext.registerTool(tool, { signal: lifecycle.signal });
       lifecycle.signal.throwIfAborted();

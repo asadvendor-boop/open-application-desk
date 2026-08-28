@@ -5,7 +5,7 @@ const sampleSummary =
 
 export const PROGRAM: ProgramDefinition = {
   id: "open-web-community-grant",
-  title: "Open Web Community Grant — Judge Sample",
+  title: "Open Web Community Grant — Reference Program",
   deadlineIso: "2026-09-04T01:00:00+05:00",
   summaryWordLimit: 90,
   requirements: [

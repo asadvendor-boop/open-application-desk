@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useState } from "react";
 
 import { PROGRAM } from "@/domain/application/sample-program";
-import type { EvidenceBinding } from "@/domain/application/types";
+import type { AuditReport, EvidenceBinding } from "@/domain/application/types";
 import { useApplicationWorkspace } from "@/hooks/use-application-workspace";
 import { useWebMcpTools } from "@/hooks/use-webmcp-tools";
 import { ActivityTimeline } from "./activity-timeline";
@@ -19,24 +19,29 @@ function errorMessage(error: unknown): string {
   return error instanceof Error ? error.message : "The operation could not be completed.";
 }
 
+function auditNotice(report: AuditReport): string {
+  return report.blockingCount === 0
+    ? `Draft r${report.draftRevision} passed all ${report.checks.length} deterministic checks.`
+    : `Draft r${report.draftRevision} has ${report.blockingCount} blocking requirement${report.blockingCount === 1 ? "" : "s"}.`;
+}
+
 export function ApplicationWorkspace() {
   const { workspace, controller, persistence } = useApplicationWorkspace();
-  const webMcpConnection = useWebMcpTools(controller);
   const [busy, setBusy] = useState<BusyState>("idle");
   const [notice, setNotice] = useState(
     "The form and readiness gate share one live application state.",
   );
+  const onWebMcpAuditCompleted = useCallback((report: AuditReport) => {
+    setNotice(auditNotice(report));
+  }, []);
+  const webMcpConnection = useWebMcpTools(controller, onWebMcpAuditCompleted);
 
   async function runAudit() {
     setBusy("auditing");
     setNotice("Checking the current revision and its public repository metadata…");
     try {
       const report = await controller.runAudit();
-      setNotice(
-        report.blockingCount === 0
-          ? `Draft r${report.draftRevision} passed all ${report.checks.length} deterministic checks.`
-          : `Draft r${report.draftRevision} has ${report.blockingCount} blocking requirement${report.blockingCount === 1 ? "" : "s"}.`,
-      );
+      setNotice(auditNotice(report));
     } catch (error) {
       setNotice(errorMessage(error));
     } finally {
@@ -136,8 +141,8 @@ export function ApplicationWorkspace() {
       <div className="origin-strip">
         <span className="origin-strip__label">Why this exists</span>
         <p>
-          Near a real deadline, one stale claim nearly survived across rules,
-          deployment links, repository evidence, and several open tabs.
+          At my last deadline, a stale claim nearly slipped through. In a grant,
+          scholarship, or accelerator application, that can cost the opportunity.
         </p>
         <span className="origin-strip__rule" aria-hidden="true" />
       </div>

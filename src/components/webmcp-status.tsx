@@ -10,7 +10,8 @@ const connectionCopy: Record<
 > = {
   unavailable: {
     title: "Manual mode",
-    detail: "WebMCP is unavailable; this workspace remains fully usable",
+    detail:
+      "WebMCP is unavailable. Use ChatGPT's in-app browser or a WebMCP-enabled Chrome; this workspace remains fully usable.",
     active: false,
   },
   connecting: {
@@ -25,7 +26,8 @@ const connectionCopy: Record<
   },
   error: {
     title: "WebMCP error",
-    detail: "Tool registration failed; manual controls remain available",
+    detail:
+      "Tool registration failed. Reload in ChatGPT's in-app browser; manual controls remain available.",
     active: false,
   },
 };

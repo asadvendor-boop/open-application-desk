@@ -71,6 +71,9 @@ describe("useWebMcpTools", () => {
 
     expect(screen.getByText("Manual mode")).toBeInTheDocument();
     expect(screen.getByText(/remains fully usable/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/ChatGPT's in-app browser/i),
+    ).toBeInTheDocument();
   });
 
   it("reports registration failure without breaking the page", async () => {

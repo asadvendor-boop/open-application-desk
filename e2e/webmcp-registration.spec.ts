@@ -33,3 +33,16 @@ test("discovers exactly five WebMCP tools after load and reload", async ({ page 
   await expect(page.getByText("WebMCP connected")).toBeVisible();
   expect(await registeredToolNames(page)).toEqual(expectedTools);
 });
+
+test("keeps the deterministic readiness gate in the compact desktop opening frame", async ({
+  page,
+}) => {
+  await installWebMcpTestDouble(page);
+  await page.setViewportSize({ width: 1265, height: 720 });
+  await page.goto("/");
+
+  await expect(page.getByText("WebMCP connected")).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Application readiness" }),
+  ).toBeInViewport({ ratio: 0.1 });
+});

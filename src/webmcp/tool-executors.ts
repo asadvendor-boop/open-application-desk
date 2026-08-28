@@ -1,6 +1,7 @@
 import type { z } from "zod";
 
 import { PROGRAM } from "@/domain/application/sample-program";
+import type { AuditReport } from "@/domain/application/types";
 import type { WorkspaceController } from "@/hooks/use-application-workspace";
 import {
   auditApplicationInputSchema,
@@ -11,6 +12,10 @@ import {
   submitApprovedApplicationInputSchema,
   toolInputSchemas,
 } from "./tool-schemas";
+
+export interface ToolExecutionObserver {
+  onAuditCompleted?(report: AuditReport): void;
+}
 
 function parseInput<T>(
   schema: z.ZodType<T>,
@@ -99,6 +104,7 @@ function getApplicationContext(
 
 export function createToolDefinitions(
   controller: WorkspaceController,
+  observer: ToolExecutionObserver = {},
 ): WebMCP.ModelContextTool[] {
   return [
     {
@@ -136,6 +142,7 @@ export function createToolDefinitions(
           "tool_audit",
           "Agent ran deterministic application checks.",
         );
+        observer.onAuditCompleted?.(report);
         const selected = parsed.requirementIds
           ? new Set<string>(parsed.requirementIds)
           : null;
