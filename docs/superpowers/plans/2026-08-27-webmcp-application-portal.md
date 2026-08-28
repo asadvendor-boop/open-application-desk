@@ -6,7 +6,7 @@
 
 **Architecture:** A single Next.js application owns the visible form, deterministic audit engine, staged patches, review authorization, and local-first judge workspace. Five imperative WebMCP tools call the same domain functions as the human interface. ChatGPT supplies reasoning through the compatible browser; the application embeds no LLM and treats public repository metadata as untrusted evidence.
 
-**Tech Stack:** Node.js 22, npm, Next.js 16.3.3, React 19.2.8, TypeScript 5.9.3, Zod 4.4.3, `webmcp-types` 0.1.5, Vitest 4.1.11, Testing Library, Playwright 1.62.1, Vercel, and the public GitHub REST API.
+**Tech Stack:** Node.js 22.12, npm, Next.js 16.3.3, React 19.2.8, TypeScript 5.9.3, Zod 4.4.3, `webmcp-types` 0.1.5, Vitest 4.1.11, Testing Library, Playwright 1.62.1, Vercel, and the public GitHub REST API.
 
 **Spec:** `docs/plans/2026-08-26-agent-native-application-portal-design.md`
 
@@ -90,7 +90,7 @@
 - Produces: `ProgramDefinition`, `ApplicationDraft`, `EvidenceBinding`, `AuditReport`, `StagedPatch`, `ReviewSnapshot`, `SubmissionReceipt`, `ActivityEntry`, `WorkspaceState`, `PROGRAM`, and `createSampleDraft()`.
 - Consumes: Only platform and package types.
 
-- [ ] **Step 1: Create the pinned package contract**
+- [x] **Step 1: Create the pinned package contract**
 
 Create `package.json` with these exact scripts and versions:
 
@@ -99,6 +99,7 @@ Create `package.json` with these exact scripts and versions:
   "name": "webmcp-application-portal",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -125,17 +126,17 @@ Create `package.json` with these exact scripts and versions:
     "@types/node": "22.20.1",
     "@types/react": "19.2.18",
     "@types/react-dom": "19.2.5",
-    "eslint": "10.9.1",
+    "eslint": "9.39.5",
     "eslint-config-next": "16.3.3",
-    "jsdom": "30.0.1",
+    "jsdom": "28.1.0",
     "typescript": "5.9.3",
-    "vite-tsconfig-paths": "6.1.1",
+    "typescript-eslint": "8.50.0",
     "vitest": "4.1.11"
   }
 }
 ```
 
-- [ ] **Step 2: Create strict configuration**
+- [x] **Step 2: Create strict configuration**
 
 Create `.gitignore` with `.next/`, `node_modules/`, `coverage/`,
 `playwright-report/`, `test-results/`, `.vercel/`, `.env*.local`, and `.DS_Store`.
@@ -181,9 +182,8 @@ Configure:
 ```ts
 // vitest.config.ts
 import { defineConfig } from "vitest/config";
-import tsconfigPaths from "vite-tsconfig-paths";
 export default defineConfig({
-  plugins: [tsconfigPaths()],
+  resolve: { tsconfigPaths: true },
   test: { environment: "jsdom", setupFiles: ["src/test/setup.ts"] },
 });
 ```
@@ -230,13 +230,13 @@ const nextConfig = {
 export default nextConfig;
 ```
 
-- [ ] **Step 3: Install dependencies**
+- [x] **Step 3: Install dependencies**
 
 Run: `npm install`
 
 Expected: exit 0 and a new `package-lock.json`.
 
-- [ ] **Step 4: Write the failing domain-contract test**
+- [x] **Step 4: Write the failing domain-contract test**
 
 ```ts
 import { describe, expect, it } from "vitest";
@@ -255,13 +255,13 @@ describe("sample program", () => {
 });
 ```
 
-- [ ] **Step 5: Verify the test fails**
+- [x] **Step 5: Verify the test fails**
 
 Run: `npm test -- src/domain/application/sample-program.test.ts`
 
 Expected: FAIL because `./sample-program` is unresolved.
 
-- [ ] **Step 6: Implement the exact domain contracts**
+- [x] **Step 6: Implement the exact domain contracts**
 
 Create `src/domain/application/types.ts`:
 
@@ -336,13 +336,13 @@ const sampleSummary = "This application describes a web project whose public art
 
 Label the workspace as a judge sample, not production data.
 
-- [ ] **Step 7: Run foundation verification**
+- [x] **Step 7: Run foundation verification**
 
 Run: `npm test -- src/domain/application/sample-program.test.ts && npm run typecheck`
 
 Expected: both commands PASS.
 
-- [ ] **Step 8: Commit the foundation**
+- [x] **Step 8: Commit the foundation**
 
 ```bash
 git add package.json package-lock.json .gitignore next-env.d.ts tsconfig.json next.config.ts eslint.config.mjs vitest.config.ts playwright.config.ts src

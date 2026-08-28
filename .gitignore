@@ -1,1 +1,10 @@
 .worktrees/
+.next/
+node_modules/
+coverage/
+playwright-report/
+test-results/
+.vercel/
+.env*.local
+.DS_Store
+*.tsbuildinfo
