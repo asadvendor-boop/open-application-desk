@@ -56,6 +56,30 @@ describe("WebMCP tool executors", () => {
     expect(controller.getState().audit?.checks).toHaveLength(10);
   });
 
+  it("reports counts for the selected audit checks rather than the hidden full report", async () => {
+    const incompleteDraft = createValidDraft();
+    incompleteDraft.fields.summary = "";
+    const controller = createWorkspaceControllerHarness(incompleteDraft);
+    const { tool } = toolNamed("audit_application", controller);
+
+    const result = await tool.execute(
+      { requirementIds: ["project_name"] },
+      { signal: liveSignal() },
+    );
+
+    expect(result).toMatchObject({
+      outcome: "audited",
+      blockingCount: 0,
+      attentionCount: 0,
+      checks: [
+        {
+          requirementId: "project_name",
+          status: "pass",
+        },
+      ],
+    });
+  });
+
   it("stages but does not apply an agent-proposed patch", async () => {
     const { controller, tool } = toolNamed("stage_draft_patch");
     const before = controller.getState().draft.fields.summary;

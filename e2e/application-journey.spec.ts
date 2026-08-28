@@ -130,6 +130,20 @@ test("completes the human-controlled WebMCP journey from blockers to receipt", a
   expect(finalAudit.blockingCount).toBe(0);
   await expect(page.getByText("10 ready")).toBeVisible();
 
+  await executeWebMcpTool(page, "stage_draft_patch", {
+    changes: [
+      {
+        field: "impactStatement",
+        value:
+          "A person retains authority while an agent helps inspect and prepare a single application.",
+        rationale: "A human must decide whether this optional wording is accurate.",
+      },
+    ],
+  });
+  await expect(
+    page.getByRole("heading", { name: "Proposed change" }),
+  ).toBeVisible();
+
   const prepared = await executeWebMcpTool<PreparedResult>(
     page,
     "prepare_submission",
@@ -167,6 +181,9 @@ test("completes the human-controlled WebMCP journey from blockers to receipt", a
   ).toBeVisible();
   await expect(page.getByTitle(prepared.draftHash)).toBeVisible();
   await expect(page.getByText("Submitted", { exact: true })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Proposed change" }),
+  ).toBeHidden();
   await page
     .getByRole("heading", { name: "Submission receipt" })
     .scrollIntoViewIfNeeded();
@@ -174,4 +191,89 @@ test("completes the human-controlled WebMCP journey from blockers to receipt", a
     path: "output/playwright/day2-submitted.png",
     animations: "disabled",
   });
+});
+
+test("reconciles concurrent submissions from two Chromium tabs to one receipt", async ({
+  context,
+  page,
+}) => {
+  await installWebMcpTestDouble(page);
+  await page.route("**/api/github-repository", async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        status: "verified",
+        repositoryUrl:
+          "https://github.com/asadvendor-boop/open-application-desk",
+        isPublic: true,
+        licenseSpdx: "MIT",
+        checkedAt: "2026-08-28T08:00:00.000Z",
+        message: "Public repository metadata checked.",
+      }),
+    });
+  });
+  await page.goto("/");
+
+  await page.getByLabel("Project summary").fill(
+    "A concise WebMCP application workspace where people retain review and submission authority.",
+  );
+  await page.getByLabel("Audience and problem").fill(
+    "Applicants need one reliable place to keep requirements, public evidence, and submission authority aligned.",
+  );
+  await page
+    .getByLabel("Live URL")
+    .fill("https://example.com/open-application-desk");
+  await page
+    .getByLabel("Public GitHub repository")
+    .fill("https://github.com/asadvendor-boop/open-application-desk");
+  await page
+    .getByLabel("Claim", { exact: true })
+    .fill("The portal provides one human-controlled application workflow.");
+  await page
+    .getByLabel("Public evidence URL")
+    .fill("https://example.com/open-application-desk");
+  await page.getByRole("checkbox", { name: /Applicant attestation/ }).check();
+
+  const contextResult = await executeWebMcpTool<ContextResult>(
+    page,
+    "get_application_context",
+    { sections: ["draft"] },
+  );
+  const audit = await executeWebMcpTool<AuditResult>(
+    page,
+    "audit_application",
+    {},
+  );
+  expect(audit.blockingCount).toBe(0);
+  const prepared = await executeWebMcpTool<PreparedResult>(
+    page,
+    "prepare_submission",
+    { expectedDraftRevision: contextResult.draft.revision },
+  );
+  await page.getByRole("button", { name: "Authorize exact application" }).click();
+
+  const secondPage = await context.newPage();
+  await installWebMcpTestDouble(secondPage);
+  await secondPage.goto("/");
+  await expect(secondPage.getByText("WebMCP connected")).toBeVisible();
+
+  const [firstReceipt, secondReceipt] = await Promise.all([
+    executeWebMcpTool<{ receiptId: string }>(
+      page,
+      "submit_approved_application",
+      { reviewId: prepared.reviewId, draftHash: prepared.draftHash },
+    ),
+    executeWebMcpTool<{ receiptId: string }>(
+      secondPage,
+      "submit_approved_application",
+      { reviewId: prepared.reviewId, draftHash: prepared.draftHash },
+    ),
+  ]);
+
+  expect(firstReceipt.receiptId).toBe(secondReceipt.receiptId);
+  await expect(page.getByRole("heading", { name: "Submission receipt" })).toBeVisible();
+  await expect(
+    secondPage.getByRole("heading", { name: "Submission receipt" }),
+  ).toBeVisible();
 });

@@ -65,13 +65,16 @@ for (const tool of createToolDefinitions(controller)) {
 
 ## Safety and state model
 
-- The agent cannot invent missing facts, attest, apply a patch, authorize, or
-  submit a changed review.
+- The agent can only stage an allowlisted text proposal. It cannot apply a
+  patch, attest, authorize, or submit; the applicant remains responsible for
+  reviewing proposed text and supplying factual claims.
 - A human edit invalidates any current audit and review; a human must re-audit
   and re-authorize.
 - The review is bound to a canonical SHA-256 draft hash and expires after five
   minutes.
-- Submission is single-use and idempotent for the same approved review/hash.
+- Submission uses a browser-provided exclusive lock, is single-use and
+  idempotent for the same approved review/hash across open tabs, and fails
+  closed when that lock is unavailable.
 - Repository verification accepts only public `github.com/owner/repository`
   URLs. It makes no arbitrary URL requests; an API failure falls back only to
   bounded GitHub and raw-license endpoints.

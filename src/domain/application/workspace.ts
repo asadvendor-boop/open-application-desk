@@ -207,6 +207,9 @@ export function applyPatch(
   patchId: string,
   now: string,
 ): WorkspaceState {
+  if (state.receipt || state.draft.workflowState === "submitted") {
+    throw new Error("The application was already submitted.");
+  }
   const patch = state.stagedPatch;
   if (!patch || patch.id !== patchId) {
     throw new Error("The staged patch was not found.");
@@ -239,6 +242,9 @@ export function rejectPatch(
   patchId: string,
   now: string,
 ): WorkspaceState {
+  if (state.receipt || state.draft.workflowState === "submitted") {
+    throw new Error("The application was already submitted.");
+  }
   const patch = state.stagedPatch;
   if (!patch || patch.id !== patchId) {
     throw new Error("The staged patch was not found.");
@@ -369,6 +375,7 @@ export async function submitApproved(
   return {
     ...state,
     draft: { ...state.draft, workflowState: "submitted" },
+    stagedPatch: stalePatch(state.stagedPatch),
     receipt: {
       id: receiptId,
       reviewId: review.id,

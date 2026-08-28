@@ -1,5 +1,5 @@
 import { act, renderHook } from "@testing-library/react";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
   authorizeReview,
@@ -7,7 +7,8 @@ import {
   prepareReview,
   recordAudit,
 } from "@/domain/application/workspace";
-import { saveWorkspace } from "@/storage/local-workspace";
+import type { SubmissionReceipt } from "@/domain/application/types";
+import { loadWorkspace, saveWorkspace } from "@/storage/local-workspace";
 import { createValidDraft, passingAudit } from "@/test/fixtures";
 import { useApplicationWorkspace } from "./use-application-workspace";
 
@@ -18,8 +19,33 @@ function bufferFromHex(value: string): ArrayBuffer {
   ).buffer;
 }
 
+function installSubmissionLock() {
+  let queue = Promise.resolve();
+  const request = function request<T>(
+    _name: string,
+    _options: LockOptions,
+    callback: (lock: Lock) => T | Promise<T>,
+  ) {
+    const run = queue.then(() => callback({} as Lock));
+    queue = run.then(
+      () => undefined,
+      () => undefined,
+    );
+    return run;
+  };
+  Object.defineProperty(navigator, "locks", {
+    configurable: true,
+    value: { request },
+  });
+}
+
+beforeEach(() => {
+  installSubmissionLock();
+});
+
 afterEach(() => {
   localStorage.clear();
+  Reflect.deleteProperty(navigator, "locks");
   vi.restoreAllMocks();
 });
 
@@ -87,5 +113,50 @@ describe("useApplicationWorkspace concurrency", () => {
       "Human edit during submission",
     );
     expect(result.current.workspace.receipt).toBeNull();
+  });
+
+  it("returns one persisted receipt when two tabs submit the same authorized review", async () => {
+    const now = new Date().toISOString();
+    const ready = recordAudit(createWorkspace(createValidDraft()), passingAudit());
+    const reviewed = await prepareReview(ready, "review-1", now);
+    const authorized = authorizeReview(reviewed, "review-1", now);
+    saveWorkspace(authorized);
+
+    const first = renderHook(() => useApplicationWorkspace());
+    const second = renderHook(() => useApplicationWorkspace());
+
+    let receipts!: [SubmissionReceipt, SubmissionReceipt];
+    await act(async () => {
+      receipts = await Promise.all([
+        first.result.current.controller.submit(
+          "review-1",
+          authorized.review!.draftHash,
+        ),
+        second.result.current.controller.submit(
+          "review-1",
+          authorized.review!.draftHash,
+        ),
+      ]);
+    });
+
+    expect(receipts[1].id).toBe(receipts[0].id);
+    expect(loadWorkspace()?.receipt?.id).toBe(receipts[0].id);
+    expect(first.result.current.workspace.receipt?.id).toBe(receipts[0].id);
+    expect(second.result.current.workspace.receipt?.id).toBe(receipts[0].id);
+  });
+
+  it("fails closed when the browser cannot serialize submissions across tabs", async () => {
+    const now = new Date().toISOString();
+    const ready = recordAudit(createWorkspace(createValidDraft()), passingAudit());
+    const reviewed = await prepareReview(ready, "review-1", now);
+    const authorized = authorizeReview(reviewed, "review-1", now);
+    saveWorkspace(authorized);
+    Reflect.deleteProperty(navigator, "locks");
+    const { result } = renderHook(() => useApplicationWorkspace());
+
+    await expect(
+      result.current.controller.submit("review-1", authorized.review!.draftHash),
+    ).rejects.toThrow("cannot guarantee a single submission");
+    expect(loadWorkspace()?.receipt).toBeNull();
   });
 });

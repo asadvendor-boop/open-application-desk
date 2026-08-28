@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { createWorkspace, applyPatch, stagePatch } from "@/domain/application/workspace";
 import type { WorkspaceState } from "@/domain/application/types";
@@ -9,6 +9,23 @@ import { createValidDraft, verifiedRepository } from "@/test/fixtures";
 import { saveWorkspace } from "@/storage/local-workspace";
 import { ApplicationWorkspace } from "./application-workspace";
 import { PatchReviewDrawer } from "./patch-review-drawer";
+
+function installSubmissionLock() {
+  Object.defineProperty(navigator, "locks", {
+    configurable: true,
+    value: {
+      request: (
+        _name: string,
+        _options: LockOptions,
+        callback: (lock: Lock) => unknown,
+      ) => callback({} as Lock),
+    },
+  });
+}
+
+afterEach(() => {
+  Reflect.deleteProperty(navigator, "locks");
+});
 
 function PatchHarness() {
   const [workspace, setWorkspace] = useState<WorkspaceState>(() =>
@@ -69,6 +86,7 @@ describe("application workspace", () => {
 
   it("completes the manual audit, review, authorization, and receipt journey", async () => {
     const user = userEvent.setup();
+    installSubmissionLock();
     saveWorkspace(createWorkspace(createValidDraft()));
     vi.stubGlobal(
       "fetch",

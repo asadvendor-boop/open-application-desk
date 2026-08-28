@@ -287,4 +287,31 @@ describe("workspace authority boundaries", () => {
     );
     expect(submitted.receipt?.id).toBe("receipt-1");
   });
+
+  it("finalizes an unreviewed proposal when its draft is submitted", async () => {
+    const ready = recordAudit(createWorkspace(createValidDraft()), passingAudit());
+    const staged = stagePatch(
+      ready,
+      {
+        changes: [
+          { field: "summary", value: "Changed", rationale: "Try again" },
+        ],
+      },
+      "patch-1",
+      NOW,
+    );
+    const reviewed = await prepareReview(staged, "review-1", NOW);
+    const authorized = authorizeReview(reviewed, "review-1", LATER);
+    const submitted = await submitApproved(
+      authorized,
+      { reviewId: "review-1", draftHash: authorized.review!.draftHash },
+      "receipt-1",
+      LATER,
+    );
+
+    expect(submitted.stagedPatch?.state).toBe("stale");
+    expect(() => rejectPatch(submitted, "patch-1", LATER)).toThrow(
+      "already submitted",
+    );
+  });
 });

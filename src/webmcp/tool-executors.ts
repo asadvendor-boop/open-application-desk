@@ -135,14 +135,16 @@ export function createToolDefinitions(
         const selected = parsed.requirementIds
           ? new Set<string>(parsed.requirementIds)
           : null;
+        const checks = report.checks
+          .filter((check) => !selected || selected.has(check.requirementId))
+          .map((check) => ({ ...check }));
         return {
           outcome: "audited",
           draftRevision: report.draftRevision,
-          blockingCount: report.blockingCount,
-          attentionCount: report.attentionCount,
-          checks: report.checks
-            .filter((check) => !selected || selected.has(check.requirementId))
-            .map((check) => ({ ...check })),
+          blockingCount: checks.filter((check) => check.status === "block").length,
+          attentionCount: checks.filter((check) => check.status === "attention")
+            .length,
+          checks,
         };
       },
     },

@@ -69,8 +69,10 @@ The project registers five imperative WebMCP tools through
 `document.modelContext.registerTool(...)`. Inputs are constrained with closed
 JSON Schema (`additionalProperties: false`) and runtime Zod validation. Tool
 registration uses an `AbortSignal` lifecycle; execution respects cancellation.
-The audit engine is deterministic, patches are limited to four allowlisted
-fields, and the receipt is hash-bound and idempotent.
+The audit engine is deterministic and tool-proposed edits stay visibly staged
+until a person applies them. The hash-bound receipt uses a browser-provided
+exclusive lock, so repeated submissions of the same authorized review reconcile
+to one receipt across open tabs; a browser without that lock fails closed.
 
 The implementation is React, TypeScript, Vinext, Zod, Playwright, and
 `webmcp-types`. The exact registration path is

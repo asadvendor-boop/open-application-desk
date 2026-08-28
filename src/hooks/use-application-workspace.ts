@@ -43,6 +43,8 @@ type PersistenceState =
   | { status: "unsaved"; message: string }
   | { status: "error"; message: string };
 
+const SUBMISSION_LOCK_NAME = "webmcp-application-portal:submission";
+
 export interface WorkspaceController {
   getState(): WorkspaceState;
   editField(field: ApplicationFieldKey, value: string): void;
@@ -71,6 +73,15 @@ function makeId(prefix: string): string {
   const random = globalThis.crypto?.randomUUID?.() ??
     `${Date.now()}-${Math.random().toString(16).slice(2)}`;
   return `${prefix}-${random}`;
+}
+
+async function withSubmissionLock<T>(operation: () => Promise<T>): Promise<T> {
+  if (typeof navigator === "undefined" || !navigator.locks) {
+    throw new Error(
+      "This browser cannot guarantee a single submission across open tabs.",
+    );
+  }
+  return navigator.locks.request(SUBMISSION_LOCK_NAME, { mode: "exclusive" }, operation);
 }
 
 function initialWorkspace(): WorkspaceState {
@@ -210,23 +221,36 @@ export function useApplicationWorkspace(): {
       },
       async submit(reviewId, draftHash) {
         const sourceState = workspaceRef.current;
-        const next = await submitApproved(
-          sourceState,
-          { reviewId, draftHash },
-          makeId("receipt"),
-          nowIso(),
-        );
-        if (workspaceRef.current !== sourceState) {
-          throw new Error(
-            "The application changed while the submission was being recorded.",
+        return withSubmissionLock(async () => {
+          if (workspaceRef.current !== sourceState) {
+            throw new Error(
+              "The application changed while the submission was being recorded.",
+            );
+          }
+          const persistedState = loadWorkspace();
+          if (!persistedState) {
+            throw new Error(
+              "Browser storage is unavailable; no submission receipt was issued.",
+            );
+          }
+          const next = await submitApproved(
+            persistedState,
+            { reviewId, draftHash },
+            makeId("receipt"),
+            nowIso(),
           );
-        }
-        if (!commit(next, true)) {
-          throw new Error(
-            "Browser storage is unavailable; no submission receipt was issued.",
-          );
-        }
-        return next.receipt!;
+          if (workspaceRef.current !== sourceState) {
+            throw new Error(
+              "The application changed while the submission was being recorded.",
+            );
+          }
+          if (!commit(next, true)) {
+            throw new Error(
+              "Browser storage is unavailable; no submission receipt was issued.",
+            );
+          }
+          return next.receipt!;
+        });
       },
       recordActivity(actor, action, summary) {
         const current = workspaceRef.current;
