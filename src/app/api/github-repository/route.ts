@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import {
+  detectCommonLicenseSpdx,
   parseGitHubRepositoryUrl,
   type RepositoryVerification,
 } from "@/domain/application/github";
@@ -24,6 +25,70 @@ function unavailable(
     checkedAt: new Date().toISOString(),
     message,
   };
+}
+
+function notFound(repositoryUrl: string): RepositoryVerification {
+  return {
+    status: "not_found",
+    repositoryUrl,
+    isPublic: null,
+    licenseSpdx: null,
+    checkedAt: new Date().toISOString(),
+    message: "GitHub did not find a public repository at this URL.",
+  };
+}
+
+async function verifyWithoutApi(
+  repositoryUrl: string,
+  owner: string,
+  repository: string,
+): Promise<RepositoryVerification> {
+  try {
+    const repositoryPage = await fetch(
+      `https://github.com/${encodeURIComponent(owner)}/${encodeURIComponent(repository)}`,
+      {
+        method: "HEAD",
+        redirect: "follow",
+        signal: AbortSignal.timeout(4_000),
+      },
+    );
+
+    if (repositoryPage.status === 404) {
+      return notFound(repositoryUrl);
+    }
+
+    if (!repositoryPage.ok) {
+      return unavailable(
+        repositoryUrl,
+        "GitHub metadata is temporarily unavailable.",
+      );
+    }
+
+    const licenseResponse = await fetch(
+      `https://raw.githubusercontent.com/${encodeURIComponent(owner)}/${encodeURIComponent(repository)}/HEAD/LICENSE`,
+      {
+        headers: { Accept: "text/plain", Range: "bytes=0-65535" },
+        signal: AbortSignal.timeout(4_000),
+      },
+    );
+    const licenseSpdx = licenseResponse.ok
+      ? detectCommonLicenseSpdx((await licenseResponse.text()).slice(0, 65_536))
+      : null;
+
+    return {
+      status: "verified",
+      repositoryUrl,
+      isPublic: true,
+      licenseSpdx,
+      checkedAt: new Date().toISOString(),
+      message: "Public repository metadata checked.",
+    };
+  } catch {
+    return unavailable(
+      repositoryUrl,
+      "GitHub metadata request failed or timed out.",
+    );
+  }
 }
 
 export async function POST(request: Request) {
@@ -78,22 +143,15 @@ export async function POST(request: Request) {
     );
 
     if (response.status === 404) {
-      const result: RepositoryVerification = {
-        status: "not_found",
-        repositoryUrl,
-        isPublic: null,
-        licenseSpdx: null,
-        checkedAt: new Date().toISOString(),
-        message: "GitHub did not find a public repository at this URL.",
-      };
-      return NextResponse.json(result);
+      return NextResponse.json(notFound(repositoryUrl));
     }
 
     if (!response.ok) {
       return NextResponse.json(
-        unavailable(
+        await verifyWithoutApi(
           repositoryUrl,
-          "GitHub metadata is temporarily unavailable.",
+          repositoryPath.owner,
+          repositoryPath.repository,
         ),
       );
     }
@@ -101,7 +159,11 @@ export async function POST(request: Request) {
     const parsedGitHub = githubResponseSchema.safeParse(await response.json());
     if (!parsedGitHub.success) {
       return NextResponse.json(
-        unavailable(repositoryUrl, "GitHub returned unrecognized metadata."),
+        await verifyWithoutApi(
+          repositoryUrl,
+          repositoryPath.owner,
+          repositoryPath.repository,
+        ),
       );
     }
 
@@ -116,7 +178,11 @@ export async function POST(request: Request) {
     return NextResponse.json(result);
   } catch {
     return NextResponse.json(
-      unavailable(repositoryUrl, "GitHub metadata request failed or timed out."),
+      await verifyWithoutApi(
+        repositoryUrl,
+        repositoryPath.owner,
+        repositoryPath.repository,
+      ),
     );
   }
 }

@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { parseGitHubRepositoryUrl } from "./github";
+import {
+  detectCommonLicenseSpdx,
+  parseGitHubRepositoryUrl,
+} from "./github";
 
 describe("parseGitHubRepositoryUrl", () => {
   it("accepts one public repository path and rejects non-GitHub hosts", () => {
@@ -20,5 +23,25 @@ describe("parseGitHubRepositoryUrl", () => {
     expect(() =>
       parseGitHubRepositoryUrl("https://github.com/openai/openai-node/issues"),
     ).toThrow("Only public github.com repository URLs are supported");
+  });
+});
+
+describe("detectCommonLicenseSpdx", () => {
+  it("recognizes bounded MIT and Apache-2.0 license text", () => {
+    expect(
+      detectCommonLicenseSpdx(
+        'Permission is hereby granted, free of charge, to any person obtaining a copy. THE SOFTWARE IS PROVIDED "AS IS".',
+      ),
+    ).toBe("MIT");
+
+    expect(
+      detectCommonLicenseSpdx(
+        "Apache License\nVersion 2.0, January 2004\nTERMS AND CONDITIONS FOR USE",
+      ),
+    ).toBe("Apache-2.0");
+  });
+
+  it("does not guess an SPDX identifier for unrecognized text", () => {
+    expect(detectCommonLicenseSpdx("Copyright 2026. All rights reserved.")).toBeNull();
   });
 });

@@ -20,6 +20,26 @@ export const repositoryVerificationSchema = z
   })
   .strict();
 
+export function detectCommonLicenseSpdx(value: string): string | null {
+  const normalized = value.replace(/\s+/g, " ").trim().toUpperCase();
+
+  if (
+    normalized.includes("PERMISSION IS HEREBY GRANTED, FREE OF CHARGE") &&
+    normalized.includes('THE SOFTWARE IS PROVIDED "AS IS"')
+  ) {
+    return "MIT";
+  }
+
+  if (
+    normalized.includes("APACHE LICENSE") &&
+    normalized.includes("VERSION 2.0, JANUARY 2004")
+  ) {
+    return "Apache-2.0";
+  }
+
+  return null;
+}
+
 const unsupportedRepositoryMessage =
   "Only public github.com repository URLs are supported";
 

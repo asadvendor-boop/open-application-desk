@@ -80,4 +80,34 @@ describe("POST /api/github-repository", () => {
     });
     expect(JSON.stringify(result)).not.toContain("sensitive upstream detail");
   });
+
+  it("falls back to the public repository and LICENSE file when the API is rate limited", async () => {
+    const fetchSpy = vi
+      .fn()
+      .mockResolvedValueOnce(new Response(null, { status: 403 }))
+      .mockResolvedValueOnce(new Response(null, { status: 200 }))
+      .mockResolvedValueOnce(
+        new Response(
+          "Apache License\nVersion 2.0, January 2004\nTERMS AND CONDITIONS FOR USE",
+          { status: 200, headers: { "Content-Type": "text/plain" } },
+        ),
+      );
+    vi.stubGlobal("fetch", fetchSpy);
+
+    const repositoryUrl = "https://github.com/openai/openai-node";
+    const response = await POST(requestFor({ repositoryUrl }));
+    const result = await response.json();
+
+    expect(result).toMatchObject({
+      status: "verified",
+      repositoryUrl,
+      isPublic: true,
+      licenseSpdx: "Apache-2.0",
+    });
+    expect(fetchSpy.mock.calls.map((call) => call[0])).toEqual([
+      "https://api.github.com/repos/openai/openai-node",
+      "https://github.com/openai/openai-node",
+      "https://raw.githubusercontent.com/openai/openai-node/HEAD/LICENSE",
+    ]);
+  });
 });
