@@ -6,7 +6,7 @@
 
 **Architecture:** A single Next.js application owns the visible form, deterministic audit engine, staged patches, review authorization, and local-first judge workspace. Five imperative WebMCP tools call the same domain functions as the human interface. ChatGPT supplies reasoning through the compatible browser; the application embeds no LLM and treats public repository metadata as untrusted evidence.
 
-**Tech Stack:** Node.js 22.12, npm, Next.js 16.3.3, React 19.2.8, TypeScript 5.9.3, Zod 4.4.3, `webmcp-types` 0.1.5, Vitest 4.1.11, Testing Library, Playwright 1.62.1, Vercel, and the public GitHub REST API.
+**Tech Stack:** Node.js >=22.13, npm, Next.js 16.3.3 through Vinext, React 19.2.8, TypeScript 5.9.3, Zod 4.4.3, `webmcp-types` 0.1.5, Vitest 4.1.11, Testing Library, Playwright 1.62.1, OpenAI Sites, Cloudflare Workers, and the public GitHub REST API.
 
 **Spec:** `docs/plans/2026-08-26-agent-native-application-portal-design.md`
 
@@ -34,6 +34,8 @@
 | --- | --- |
 | `package.json` | Pinned dependencies and verification scripts |
 | `next.config.ts` | Next.js configuration and same-origin tools permissions policy |
+| `vite.config.ts` | Vinext, Sites, and Cloudflare Worker build configuration |
+| `.openai/hosting.json` | OpenAI Sites project binding |
 | `vitest.config.ts` | Unit/component test environment |
 | `playwright.config.ts` | Browser tests with a managed development server |
 | `src/app/layout.tsx` | Fonts, metadata, and application shell |
@@ -723,16 +725,17 @@ Run: `npm test -- src/storage/local-workspace.test.ts src/components/application
 
 Expected: all commands PASS without hydration warnings.
 
-- [ ] **Step 7: Commit and deploy the Day 1 path**
+- [ ] **Step 7: Commit and deploy the Day 1 path to OpenAI Sites**
 
 ```bash
-git add src next.config.ts package.json package-lock.json
-git commit -m "feat: deliver manual application workspace"
-npx vercel@latest --yes
+PATH=/Users/asad.ali/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin:$PATH npm run verify
+git add src next.config.ts vite.config.ts .openai/hosting.json package.json package-lock.json docs/superpowers/plans/2026-08-27-webmcp-application-portal.md
+git commit -m "build: migrate application portal to OpenAI Sites"
 ```
 
-Record the preview URL. Open it in a fresh browser and manually complete Draft
--> Review -> Submitted. Day 1 stops if this is broken; do not begin WebMCP on a
+Create and save one Sites version from that exact commit, deploy it, record the
+production URL, and open it in a fresh browser. Manually complete Draft ->
+Review -> Submitted. Day 1 stops if this is broken; do not begin WebMCP on a
 broken UI.
 
 ---
