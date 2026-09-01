@@ -13,9 +13,10 @@ explain it first. Ask each person, in this order:
 4. What remains under human control?
 
 Record answers verbatim. Pass only when at least two of three people correctly
-identify all four ideas: a high-stakes applicant; stale or missing application
-claims; the agent used webpage-provided tools to audit the live draft and stage
-a preview; and the person controls facts, changes, and submission.
+identify all four ideas: a high-stakes applicant near a real deadline; stale or
+missing application claims; the agent used webpage-provided tools to audit the
+live draft and stage a preview; and the person controls facts, changes, and
+submission.
 
 | Reviewer | Unfamiliar with project | User | Pain | Agent action | Human control | Pass |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -35,7 +36,10 @@ external-user validation.
 - `get_application_context` and `audit_application` begin at second zero;
   **For high-stakes applicants**, `3/10 ready`, `7 blockers remain`, and
   **0 fields changed** are readable by second eight.
-- `stage_draft_patch` begins by second 24, and its non-mutating `3/10 → 7/10`
+- The first narration sentence establishes the real deadline and stale-claim
+  pain while the WebMCP tools are already running; there is no separate origin
+  or inspiration segment.
+- `stage_draft_patch` begins by second 25, and its non-mutating `3/10 → 7/10`
   preview plus the native Apply boundary are legible within the first 30
   seconds.
 - Captions match the spoken words and do not cover tool results or controls.
