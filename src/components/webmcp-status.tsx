@@ -9,9 +9,9 @@ const connectionCopy: Record<
   { title: string; detail: string; active: boolean }
 > = {
   unavailable: {
-    title: "Manual mode",
+    title: "Manual mode — fully usable",
     detail:
-      "WebMCP is unavailable. Use ChatGPT's in-app browser or a WebMCP-enabled Chrome; this workspace remains fully usable.",
+      "This desk works for anyone without an agent. In ChatGPT's built-in browser or another WebMCP-compatible agent browser, an agent can collaborate on this same live draft. Agent availability depends on browser support and rollout.",
     active: false,
   },
   connecting: {

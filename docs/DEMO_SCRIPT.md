@@ -21,7 +21,7 @@ human action visible.
 | 1:47–2:10 | Show `prepare_submission`, the exact draft hash, native **Authorize exact application**, then `submit_approved_application`. | Preparation creates a five-minute review bound to this draft hash. I authorize that exact artifact in the page; only then can the agent submit it. |
 | 2:10–2:29 | Hold on the receipt’s measured journey: `7 blockers caught`, `10 / 10 ready`, `0 blockers remain`, and the reviewed hash. | The receipt now binds the visible result: seven blockers caught, zero remaining, and the exact reviewed hash submitted once. That is demonstrated impact, not an acceptance promise. |
 | 2:29–2:40 | Show the five core registration names, the contextual fact tool while it is needed, then `src/webmcp/register-tools.ts` and a strict-schema excerpt. | Five strict core registrations share the same controller as the form; one contextual request appears only when a fact is missing. WebMCP turns the page itself into the agent interface—not another chatbot or click bot. |
-| 2:40–2:48 | End on the receipt and origin strip. | Open Application Desk lets agents prepare the application while applicants keep the facts, the changes, and final authorization. |
+| 2:40–2:48 | End on the receipt and origin strip. | Anyone can use the desk manually today. In compatible agent browsers, WebMCP adds this collaboration while applicants keep the facts, changes, and final authorization. |
 
 ## Rehearsal procedure
 

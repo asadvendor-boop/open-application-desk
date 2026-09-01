@@ -95,10 +95,13 @@ describe("useWebMcpTools", () => {
   it("keeps the complete manual experience when WebMCP is unavailable", () => {
     render(<HookHarness />);
 
-    expect(screen.getByText("Manual mode")).toBeInTheDocument();
-    expect(screen.getByText(/remains fully usable/i)).toBeInTheDocument();
+    expect(screen.getByText("Manual mode — fully usable")).toBeInTheDocument();
+    expect(screen.getByText(/works for anyone without an agent/i)).toBeInTheDocument();
     expect(
-      screen.getByText(/ChatGPT's in-app browser/i),
+      screen.getByText(/availability depends on browser support and rollout/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/ChatGPT's built-in browser/i),
     ).toBeInTheDocument();
   });
 

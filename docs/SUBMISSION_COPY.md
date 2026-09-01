@@ -126,6 +126,10 @@ public API is unavailable; the application never invents a result. A passing
 readiness check does not certify a claim, guarantee acceptance, or replace a
 person’s judgment.
 
+WebMCP collaboration currently requires a compatible agent browser. The desk
+remains fully usable without one; availability of agent collaboration depends on
+browser support and rollout.
+
 ## Submission-only checks
 
 Before pasting the description into Devpost, add the final no-login live URL
