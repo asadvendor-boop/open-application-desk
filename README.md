@@ -15,7 +15,11 @@ clicks. The page itself publishes a typed collaboration surface through WebMCP.
 
 ## Judge in 90 seconds
 
-1. Open the live URL in ChatGPT's in-app browser or a WebMCP-enabled Chrome.
+1. Open the live URL in the ChatGPT desktop app's built-in browser with
+   ChatGPT Work or Codex on GPT-5.6 Sol/Terra. For native Chrome, use the
+   optional open-source
+   [OpenAI WebMCP Tool Inspector](https://github.com/asadvendor-boop/openai-webmcp-tool-inspector)
+   with Chrome's WebMCP testing flag enabled.
 2. Confirm the header says **WebMCP connected**. The application registers five
    core tools against its actual page state, plus one contextual fact request
    only while the applicant's audience fact is missing.
@@ -32,6 +36,23 @@ clicks. The page itself publishes a typed collaboration surface through WebMCP.
    first audit to the final gate.
 
 Use **Reset sample** for a fresh browser-local workspace.
+
+## Compatible agent hosts
+
+- **Official ChatGPT path:** the ChatGPT desktop app's built-in browser with
+  ChatGPT Work or Codex on GPT-5.6 Sol or Terra, with Site Tools enabled. Access
+  depends on the current product rollout and account settings.
+- **Optional native-Chrome path:** the open-source
+  [OpenAI WebMCP Tool Inspector](https://github.com/asadvendor-boop/openai-webmcp-tool-inspector)
+  discovers registered page tools and maps them to OpenAI Responses API
+  function calls. It is an unofficial developer adapter, uses a user-supplied
+  API key held only for the browser session, and is not part of ChatGPT.
+- **Ordinary browsers and chatgpt.com:** the application remains fully usable
+  in Manual mode. The chatgpt.com web surface does not currently expose the
+  WebMCP Site Tools host used by this project.
+
+See the current [OpenAI WebMCP guide](https://learn.chatgpt.com/docs/webmcp)
+for official host and model availability.
 
 ## Demonstrated outcome
 
@@ -118,8 +139,8 @@ npm run dev
 ```
 
 Open `http://127.0.0.1:3000`. In an unsupported browser, Manual mode remains
-fully usable; use ChatGPT's in-app browser or Chrome 149+ with WebMCP testing
-enabled to discover the tools.
+fully usable. To discover tools, use the supported ChatGPT desktop path above
+or Chrome 149+ with WebMCP testing enabled and a compatible agent extension.
 
 ```bash
 npm run verify
@@ -134,6 +155,13 @@ The project uses React, TypeScript, Vinext, Zod, `webmcp-types`, Vitest,
 Playwright, and OpenAI Sites. The host binding lives in
 `.openai/hosting.json`. Source is versioned before each Sites production
 deployment.
+
+The challenge build deliberately uses browser-local persistence. A portal
+operator can replace `src/storage/local-workspace.ts` with authenticated server
+storage while keeping the controller, five WebMCP contracts, deterministic
+gate, visible patch review, and human authorization boundary unchanged. That is
+the adoption seam for foundations, accelerators, admissions offices, and
+procurement portals; this sample does not claim that migration has occurred.
 
 Set `GITHUB_TOKEN` only if higher GitHub public-metadata quota is needed. It is
 optional and must be configured as a runtime secret; it is never committed.

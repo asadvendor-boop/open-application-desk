@@ -2,37 +2,47 @@
 
 This gate applies to the exported submission video, not the script alone.
 
-## First-30-second blind test
+## First-30-second comprehension check
 
-Show only `0:00–0:30` to three people who have not seen the product and do not
-explain it first. Ask each person, in this order:
+Watch only `0:00–0:30` without reading the Devpost description. Confirm that the
+clip independently answers:
 
 1. Who is this for?
 2. What painful problem does it solve?
 3. What did the agent just do?
 4. What remains under human control?
 
-Record answers verbatim. Pass only when at least two of three people correctly
-identify all four ideas: a high-stakes applicant near a real deadline; stale or
-missing application claims; the agent used webpage-provided tools to audit the
-live draft and stage a preview; and the person controls facts, changes, and
-submission.
+The answers must be visible or spoken: a high-stakes applicant near a real
+deadline; stale or missing application claims; the agent used webpage-provided
+tools to audit the live draft and stage a preview; and the person controls facts,
+changes, and submission.
 
-| Reviewer | Unfamiliar with project | User | Pain | Agent action | Human control | Pass |
-| --- | --- | --- | --- | --- | --- | --- |
-| 1 | UNRUN | UNRUN | UNRUN | UNRUN | UNRUN | UNRUN |
-| 2 | UNRUN | UNRUN | UNRUN | UNRUN | UNRUN | UNRUN |
-| 3 | UNRUN | UNRUN | UNRUN | UNRUN | UNRUN | UNRUN |
+External blind testing remains useful but is not a release blocker for this
+deadline. Status: **SKIPPED — no external-user-validation claim will be made.**
 
-Status: **UNRUN — requires the final exported video and three external human
-reviewers.** AI cold-reading can improve the script but must not be reported as
-external-user validation.
+## Chrome recording preflight
+
+- Chrome 149+ has `chrome://flags/#enable-webmcp-testing` enabled and has been
+  fully relaunched.
+- The unpacked extension is loaded from the local
+  `WebMCP-OpenAI-Inspector` folder and its OpenAI API key is configured before
+  recording.
+- The unrelated third-party WebMCP inspector is disabled to prevent duplicate
+  side panels or false status messages.
+- The production URL is open on a freshly reset sample and the page says
+  **WebMCP connected**.
+- The OpenAI agent side panel discovers the five core tools plus the contextual
+  `request_applicant_fact` tool while the audience fact is missing.
+- No API key, extension settings, browser flags, private tabs, or notifications
+  appear in the capture.
 
 ## Export checks
 
 - Duration is between 150 and 165 seconds and strictly under 180 seconds.
 - The video starts on the working application with no title card, setup, login,
-  loading screen, personal-origin introduction, or reset cut.
+  API-key entry, loading screen, personal-origin introduction, or reset cut.
+- The agent side panel visibly shows OpenAI invoking registered WebMCP tools;
+  the recording does not substitute manual tool execution for the agent flow.
 - `get_application_context` and `audit_application` begin at second zero;
   **For high-stakes applicants**, `3/10 ready`, `7 blockers remain`, and
   **0 fields changed** are readable by second eight.
@@ -50,3 +60,7 @@ external-user validation.
   legible.
 - The video contains no credentials, private tabs, notifications, or invented
   user-validation claims.
+- The closing host statement is precise: manual mode works everywhere; agent
+  collaboration uses the supported ChatGPT desktop Work/Codex host or the
+  optional OpenAI Chrome developer extension. It does not imply that ordinary
+  chatgpt.com currently hosts these page tools.

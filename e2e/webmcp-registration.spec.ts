@@ -40,7 +40,7 @@ test("discovers five core tools plus the one contextual fact request only while 
     );
   });
   await page.getByLabel("Your answer").fill("Applicants need a truthful shared draft.");
-  await page.getByRole("button", { name: "Share answer with ChatGPT" }).click();
+  await page.getByRole("button", { name: "Share answer with agent" }).click();
   await pendingFact;
   await expect.poll(() => registeredToolNames(page)).toEqual(expectedTools);
 

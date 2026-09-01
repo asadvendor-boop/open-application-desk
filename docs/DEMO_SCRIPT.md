@@ -1,27 +1,33 @@
 # Open Application Desk — locked demo script
 
-**Target duration:** 2:40. Start on the working application and its compatible
-agent browser. The first frame begins one uninterrupted live journey; there is
-no title card, setup sequence, personal-origin introduction, or reset cut.
+**Target duration:** 2:40. Record in native Chrome 149+ with WebMCP testing
+enabled and the open-source **OpenAI WebMCP Tool Inspector** side panel already
+open. Configure the OpenAI API key before recording. The first frame begins one
+uninterrupted live journey; there is no title card, setup sequence, key entry,
+login, loading screen, or reset cut.
 
 **Recording gate:** Use only the final no-login production URL after its
 WebMCP registration and golden journey have been verified. Do not record this
 script against the older Day 1 manual deployment. Keep the browser at 1440 ×
 900, record the workflow in short clips, jump-cut tool latency and other dead
 air, and make every tool result and native human action visible. Never speed up
-a consequential review or authorization moment beyond legibility.
+a consequential review or authorization moment beyond legibility. Disable the
+unrelated third-party WebMCP inspector before recording, and never expose an API
+key, browser settings, notifications, or private tabs. Describe this side panel
+accurately as an optional OpenAI-powered developer extension—not as an official
+ChatGPT extension.
 
 | Time | Screen proof | Narration |
 | --- | --- | --- |
-| 0:00–0:12 | Start already on the fresh sample in a compatible agent browser with **For high-stakes applicants** and **WebMCP connected** visible. While the personal-pain sentence is spoken, show ChatGPT call `get_application_context` and `audit_application`; jump-cut latency. Land on `3/10 ready`, `7 blockers remain`, and an overlay reading **0 fields changed** by 0:08. | Near a real deadline, I nearly submitted one stale claim. Now ChatGPT audits this live application through WebMCP: three of ten ready, seven blockers, zero edits. |
-| 0:12–0:25 | Hold briefly on concrete blockers and the unchanged draft revision, then show ChatGPT call `stage_draft_patch`. Do not type the prompt live. | The page exposes typed tools for its exact live state, so the agent can reason without scraping or guessing. |
+| 0:00–0:12 | Start already on the fresh sample with **For high-stakes applicants**, **WebMCP connected**, and the OpenAI agent side panel visible. While the personal-pain sentence is spoken, show the agent call `get_application_context` and `audit_application`; jump-cut latency. Land on `3/10 ready`, `7 blockers remain`, and an overlay reading **0 fields changed** by 0:08. | Near a real deadline, I nearly submitted one stale claim. Now an OpenAI-powered agent audits this live application through WebMCP: three of ten ready, seven blockers, zero edits. |
+| 0:12–0:25 | Hold briefly on concrete blockers and the unchanged draft revision, then show the agent call `stage_draft_patch`. Do not type the prompt live. | The page exposes typed tools for its exact live state, so the agent can reason without scraping or guessing. |
 | 0:25–0:44 | Show **Preview only — not applied**, the compact `3/10 → 7/10` projection, and all three old/new values. Add a brief **Human applies** overlay, then use native **Apply proposed changes**. | It stages a bounded patch and predicts four resolved blockers. This is only a preview: every original value remains until the applicant uses Apply. |
-| 0:44–1:04 | Show that the missing audience fact makes `request_applicant_fact` appear. Call it, hold on the page-owned question and waiting state, then answer through native **Share answer with ChatGPT**. Add a brief **Contextual tool appeared** overlay. | Because the audience fact is missing, the page dynamically exposes one contextual tool. The agent stops; I supply the fact through the native page. |
+| 0:44–1:04 | Show that the missing audience fact makes `request_applicant_fact` appear. Call it, hold on the page-owned question and waiting state, then answer through native **Share answer with agent**. Add a brief **Contextual tool appeared** overlay. | Because the audience fact is missing, the page dynamically exposes one contextual tool. The agent stops; I supply the fact through the native page. |
 | 1:04–1:23 | Add public evidence, check attestation, and call `audit_application` again. Jump-cut latency and hold on `10/10 ready` with `0 blockers remain`. | I add public evidence and attest to the claim. A fresh audit reaches ten of ten, with zero blockers. |
 | 1:23–1:49 | Show `prepare_submission`, the exact draft hash, native **Authorize exact application**, then `submit_approved_application`. Keep the authorization action at normal speed and add a brief **Human authorizes this hash** overlay. | Preparation creates a five-minute review bound to this exact draft hash. Only after I authorize that artifact can the agent submit it. |
 | 1:49–2:08 | Hold on the receipt’s measured journey: `7 blockers caught`, `10 / 10 ready`, `0 blockers remain`, and the reviewed hash. | The receipt proves the journey: seven blockers caught, zero remaining, and the reviewed hash submitted once. |
 | 2:08–2:30 | Show the five core registration names, the contextual fact tool appearing only while needed, then `src/webmcp/register-tools.ts` and one strict-schema excerpt. Avoid a repository tour. | Five strict core tools share the same controller as the form. The contextual fact tool exists only when needed, and every input is schema-validated. |
-| 2:30–2:40 | Return to the receipt and human-control labels. | The desk works manually for anyone. In a compatible agent browser, WebMCP adds shared-state collaboration while the applicant keeps facts, changes, and final authorization. |
+| 2:30–2:40 | Return to the receipt and human-control labels. Add a compact overlay: **Agent hosts: ChatGPT desktop Work/Codex · optional OpenAI Chrome extension**. | Manual mode works everywhere. In ChatGPT desktop or this OpenAI Chrome extension, WebMCP adds collaboration while I keep final authority. |
 
 ## Rehearsal procedure
 
@@ -35,12 +41,12 @@ a consequential review or authorization moment beyond legibility.
    video once with sound, verify captions, then check the duration is between
    150 and 165 seconds and strictly under 180 seconds before uploading it
    publicly.
-4. Run the exported video's first 30 seconds through the blind comprehension
-   protocol in `docs/RECORDING_VALIDATION.md`. Do not count the project owner or
-   anyone who already knows the product.
+4. Run the exported video's first 30 seconds through the owner comprehension
+   checklist in `docs/RECORDING_VALIDATION.md`. External-user validation is
+   optional and must not be claimed unless it is actually performed.
 
 ## Narration count
 
-The narration above is **198 words** across a 2:40 target. Recount it after any
+The narration above is **196 words** across a 2:40 target. Recount it after any
 recording edit; spoken pacing must remain natural, the first WebMCP calls must
 begin at second zero, and the audit result must be visible by second eight.

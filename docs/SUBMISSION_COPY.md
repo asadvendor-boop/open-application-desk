@@ -6,7 +6,7 @@ Open Application Desk
 
 ## Elevator pitch
 
-The application form that can explain and audit itself with ChatGPT—while its
+The application form that can explain and audit itself to an AI agent—while its
 WebMCP tools cannot apply changes or authorize submission.
 
 ## Description
@@ -117,6 +117,25 @@ The implementation is React, TypeScript, Vinext, Zod, Playwright, and
 `src/webmcp/register-tools.ts`; tool authority boundaries live in
 `src/webmcp/tool-executors.ts`.
 
+For the native-Chrome recording path, an optional open-source developer
+extension discovers the same registered tools, maps their JSON Schemas to
+OpenAI Responses API functions, and routes structured results back to the
+model. It uses a user-supplied OpenAI API key held only for that browser
+session. The extension is not required when the site runs in the supported
+ChatGPT desktop host, and it is published separately at
+https://github.com/asadvendor-boop/openai-webmcp-tool-inspector.
+
+### Adoption path
+
+The current sample is browser-local so a judge can reset and reproduce it
+without an account. A foundation, accelerator, admissions office, or
+procurement portal can replace the local persistence seam with authenticated
+server storage while retaining the same controller, typed WebMCP contracts,
+deterministic gate, visible patch review, and human authorization boundary.
+That gives both sides a clearer record of what was checked, reviewed, and
+submitted. This is an implementation path, not a claim that an institution has
+already adopted the sample.
+
 ### Honest limits
 
 This is a challenge sample rather than a shared production backend. Drafts and
@@ -126,9 +145,12 @@ public API is unavailable; the application never invents a result. A passing
 readiness check does not certify a claim, guarantee acceptance, or replace a
 person’s judgment.
 
-WebMCP collaboration currently requires a compatible agent browser. The desk
-remains fully usable without one; availability of agent collaboration depends on
-browser support and rollout.
+Manual mode works in every browser. The official WebMCP agent path currently
+requires the ChatGPT desktop app's built-in browser with ChatGPT Work or Codex
+on GPT-5.6 Sol or Terra, with Site Tools enabled; access depends on account
+settings and rollout. Native Chrome can use the optional open-source OpenAI
+developer extension described above. The ordinary chatgpt.com web surface does
+not currently expose the WebMCP Site Tools host used by this project.
 
 ## Submission-only checks
 

@@ -20,7 +20,7 @@ export function ApplicantFactHandoff({
 
   return (
     <section className="applicant-fact-handoff" aria-labelledby="fact-handoff-title">
-      <p className="applicant-fact-handoff__eyebrow">ChatGPT is waiting</p>
+      <p className="applicant-fact-handoff__eyebrow">Agent is waiting</p>
       <h2 id="fact-handoff-title">A fact only you can supply</h2>
       <p>{request.question}</p>
       <label htmlFor="applicant-fact-answer">Your answer</label>
@@ -43,7 +43,7 @@ export function ApplicantFactHandoff({
           disabled={!ready}
           onClick={() => onAnswer(answer.trim())}
         >
-          Share answer with ChatGPT
+          Share answer with agent
         </button>
       </div>
     </section>

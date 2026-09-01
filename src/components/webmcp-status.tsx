@@ -11,7 +11,7 @@ const connectionCopy: Record<
   unavailable: {
     title: "Manual mode — fully usable",
     detail:
-      "This desk works for anyone without an agent. In ChatGPT's built-in browser or another WebMCP-compatible agent browser, an agent can collaborate on this same live draft. Agent availability depends on browser support and rollout.",
+      "Manual controls work in every browser. Agent collaboration requires the ChatGPT desktop app's built-in browser with ChatGPT Work or Codex (GPT-5.6 Sol or Terra), or a compatible Chrome agent extension. Availability depends on browser support and rollout.",
     active: false,
   },
   connecting: {
@@ -27,7 +27,7 @@ const connectionCopy: Record<
   error: {
     title: "WebMCP error",
     detail:
-      "Tool registration failed. Reload in ChatGPT's in-app browser; manual controls remain available.",
+      "Tool registration failed. Reload in a supported ChatGPT desktop agent browser or compatible Chrome agent extension; manual controls remain available.",
     active: false,
   },
 };

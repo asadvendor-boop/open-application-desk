@@ -77,7 +77,7 @@ When requested, the page displays:
 >
 > Who is this application for, and what specific difficulty do they face?
 
-The submission action is named **Share answer with ChatGPT** and explicitly
+The submission action is named **Share answer with agent** and explicitly
 states that the answer is added to the draft and returned to the waiting agent.
 The other action is **Cancel request**.
 

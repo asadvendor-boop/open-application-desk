@@ -23,13 +23,14 @@ describe("ApplicantFactHandoff", () => {
     expect(
       screen.getByRole("heading", { name: "A fact only you can supply" }),
     ).toBeInTheDocument();
+    expect(screen.getByText("Agent is waiting")).toBeInTheDocument();
     expect(onAnswer).not.toHaveBeenCalled();
     await user.type(
       screen.getByLabelText("Your answer"),
       "Independent applicants need a truthful view of their evidence.",
     );
     await user.click(
-      screen.getByRole("button", { name: "Share answer with ChatGPT" }),
+      screen.getByRole("button", { name: "Share answer with agent" }),
     );
 
     expect(onAnswer).toHaveBeenCalledWith(

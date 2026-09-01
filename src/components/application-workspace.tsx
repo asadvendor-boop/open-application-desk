@@ -174,7 +174,7 @@ export function ApplicationWorkspace() {
               <h2>This form can explain itself.<br />You decide what gets submitted.</h2>
             </div>
             <p>
-              Instead of scraping pixels, ChatGPT gets five core typed WebMCP
+              Instead of scraping pixels, a compatible agent gets five core typed WebMCP
               tools for this exact draft. Native controls keep facts, changes,
               and authorization human-owned.
             </p>

@@ -96,12 +96,21 @@ describe("useWebMcpTools", () => {
     render(<HookHarness />);
 
     expect(screen.getByText("Manual mode — fully usable")).toBeInTheDocument();
-    expect(screen.getByText(/works for anyone without an agent/i)).toBeInTheDocument();
+    expect(screen.getByText(/manual controls work in every browser/i)).toBeInTheDocument();
     expect(
       screen.getByText(/availability depends on browser support and rollout/i),
     ).toBeInTheDocument();
     expect(
-      screen.getByText(/ChatGPT's built-in browser/i),
+      screen.getByText(/ChatGPT desktop app's built-in browser/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/ChatGPT Work or Codex/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/GPT-5\.6 Sol or Terra/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/compatible Chrome agent extension/i),
     ).toBeInTheDocument();
   });
 
@@ -119,5 +128,8 @@ describe("useWebMcpTools", () => {
       expect(screen.getByText("WebMCP error")).toBeInTheDocument(),
     );
     expect(screen.getByText(/manual controls remain available/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/supported ChatGPT desktop agent browser or compatible Chrome agent extension/i),
+    ).toBeInTheDocument();
   });
 });

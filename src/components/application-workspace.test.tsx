@@ -127,6 +127,9 @@ describe("application workspace", () => {
         "Agent-native application portal",
       ),
     );
+    expect(
+      screen.getByText(/a compatible agent gets five core typed WebMCP tools/i),
+    ).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "Run readiness audit" }));
     expect(await screen.findByText("10 ready")).toBeInTheDocument();

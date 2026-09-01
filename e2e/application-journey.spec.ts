@@ -122,7 +122,7 @@ test("completes the human-controlled WebMCP journey from blockers to receipt", a
   await page.getByLabel("Your answer").fill(
     "Applicants under deadline pressure risk rejection when requirements, claims, and public evidence drift across disconnected tabs.",
   );
-  await page.getByRole("button", { name: "Share answer with ChatGPT" }).click();
+  await page.getByRole("button", { name: "Share answer with agent" }).click();
   await expect(applicantFact).resolves.toMatchObject({
     outcome: "answered",
     source: "human",
@@ -252,7 +252,7 @@ test("reconciles concurrent submissions from two Chromium tabs to one receipt", 
   await page.getByLabel("Your answer").fill(
     "Applicants need one reliable place to keep requirements, public evidence, and submission authority aligned.",
   );
-  await page.getByRole("button", { name: "Share answer with ChatGPT" }).click();
+  await page.getByRole("button", { name: "Share answer with agent" }).click();
   await applicantFact;
   await page
     .getByLabel("Live URL")
