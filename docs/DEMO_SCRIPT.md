@@ -1,45 +1,46 @@
 # Open Application Desk — locked demo script
 
-**Target duration:** 2:48. The opening uses one clearly labeled cold-open result,
-then returns to the fresh sample for one uninterrupted live journey.
+**Target duration:** 2:40. Start on the working application and its compatible
+agent browser. The first frame begins one uninterrupted live journey; there is
+no title card, setup sequence, personal-origin introduction, or reset cut.
 
 **Recording gate:** Use only the final no-login production URL after its
 WebMCP registration and golden journey have been verified. Do not record this
 script against the older Day 1 manual deployment. Keep the browser at 1440 ×
-900, leave system waits at normal speed, and make every tool result and native
-human action visible.
+900, record the workflow in short clips, jump-cut tool latency and other dead
+air, and make every tool result and native human action visible. Never speed up
+a consequential review or authorization moment beyond legibility.
 
 | Time | Screen proof | Narration |
 | --- | --- | --- |
-| 0:00–0:09 | **Cold open:** show the real audited sample at `3/10 ready` and `7 blockers remain`, with **For high-stakes applicants** visible. Keep both numbers legible. | As an applicant racing a deadline, I nearly submitted a stale claim. This portal found seven blockers before they cost me the opportunity. |
-| 0:09–0:16 | Cut once to a fresh reset with a small “30 seconds earlier” label. Show the personal origin strip and **WebMCP connected** status. | So I built a form that can explain itself—but only I can authorize submission. |
-| 0:16–0:30 | Ask ChatGPT: “Read this application, audit it, and do not edit or submit anything.” Show `get_application_context` and `audit_application`; the live result must be visible by 0:28. | ChatGPT discovers five core typed WebMCP tools and audits this exact page. The gate returns three of ten ready, with no draft edit. |
-| 0:30–0:47 | Hold on seven concrete blockers and unchanged draft revision. | The checks are deterministic: the summary is too long, the audience fact is missing, public evidence is absent, and I have not attested. The draft is unchanged. |
-| 0:47–1:06 | Call `stage_draft_patch` with the concise summary, deployed HTTPS URL, and public repository URL. Show **Preview only — not applied**, the compact `3/10 → 7/10` readiness rows, all three old/new values, then use native **Apply proposed changes**. | The agent can predict what its proposal fixes: four blockers. I still review every value; the draft stays untouched until I use the native Apply control. |
-| 1:06–1:24 | Ask ChatGPT to call `request_applicant_fact`. Show the page-owned question, visible waiting state, and native **Share answer with ChatGPT** control. Answer it yourself. | When it reaches a fact only I know, the agent must stop and ask me. The page owns the question; I decide whether to share the answer. |
-| 1:24–1:47 | Add public evidence, check attestation, and show the green re-audit. | I link public evidence and attest to my claim. A fresh audit turns the exact revision green: ten of ten ready, zero blockers. |
-| 1:47–2:10 | Show `prepare_submission`, the exact draft hash, native **Authorize exact application**, then `submit_approved_application`. | Preparation creates a five-minute review bound to this draft hash. I authorize that exact artifact in the page; only then can the agent submit it. |
-| 2:10–2:29 | Hold on the receipt’s measured journey: `7 blockers caught`, `10 / 10 ready`, `0 blockers remain`, and the reviewed hash. | The receipt now binds the visible result: seven blockers caught, zero remaining, and the exact reviewed hash submitted once. That is demonstrated impact, not an acceptance promise. |
-| 2:29–2:40 | Show the five core registration names, the contextual fact tool while it is needed, then `src/webmcp/register-tools.ts` and a strict-schema excerpt. | Five strict core registrations share the same controller as the form; one contextual request appears only when a fact is missing. WebMCP turns the page itself into the agent interface—not another chatbot or click bot. |
-| 2:40–2:48 | End on the receipt and origin strip. | Anyone can use the desk manually today. In compatible agent browsers, WebMCP adds this collaboration while applicants keep the facts, changes, and final authorization. |
+| 0:00–0:08 | Start already on the fresh sample in a compatible agent browser with **For high-stakes applicants** and **WebMCP connected** visible. Show ChatGPT call `get_application_context` and `audit_application`; jump-cut latency. Land on `3/10 ready`, `7 blockers remain`, and an overlay reading **0 fields changed** by 0:08. | ChatGPT audits this live high-stakes application through WebMCP: three of ten ready, seven blockers, and zero fields changed. |
+| 0:08–0:24 | Hold briefly on concrete blockers and the unchanged draft revision, then show ChatGPT call `stage_draft_patch`. Do not type the prompt live. | The page exposes typed tools for its exact live state, so the agent sees rules and missing evidence without scraping or guessing. |
+| 0:24–0:43 | Show **Preview only — not applied**, the compact `3/10 → 7/10` projection, and all three old/new values. Add a brief **Human applies** overlay, then use native **Apply proposed changes**. | It stages a bounded patch and predicts four resolved blockers. This is only a preview: every original value remains until the applicant uses Apply. |
+| 0:43–1:03 | Show that the missing audience fact makes `request_applicant_fact` appear. Call it, hold on the page-owned question and waiting state, then answer through native **Share answer with ChatGPT**. Add a brief **Contextual tool appeared** overlay. | Because the audience fact is missing, the page dynamically exposes one contextual tool. The agent stops; I supply the fact through the native page. |
+| 1:03–1:23 | Add public evidence, check attestation, and call `audit_application` again. Jump-cut latency and hold on `10/10 ready` with `0 blockers remain`. | I add public evidence and attest to the claim. A fresh audit reaches ten of ten, with zero blockers. |
+| 1:23–1:49 | Show `prepare_submission`, the exact draft hash, native **Authorize exact application**, then `submit_approved_application`. Keep the authorization action at normal speed and add a brief **Human authorizes this hash** overlay. | Preparation creates a five-minute review bound to this exact draft hash. Only after I authorize that artifact can the agent submit it. |
+| 1:49–2:08 | Hold on the receipt’s measured journey: `7 blockers caught`, `10 / 10 ready`, `0 blockers remain`, and the reviewed hash. | The receipt proves the journey: seven blockers caught, zero remaining, and the reviewed hash submitted once. |
+| 2:08–2:30 | Show the five core registration names, the contextual fact tool appearing only while needed, then `src/webmcp/register-tools.ts` and one strict-schema excerpt. Avoid a repository tour. | Five strict core tools share the same controller as the form. The contextual fact tool exists only when needed, and every input is schema-validated. |
+| 2:30–2:40 | Return to the receipt and human-control labels. | The desk works manually for anyone. In a compatible agent browser, WebMCP adds shared-state collaboration while the applicant keeps facts, changes, and final authorization. |
 
 ## Rehearsal procedure
 
 1. Begin with a fresh sample draft and record no video. Run the journey once for
    correctness. Stop immediately if a tool fails to register, a draft changes
    before native Apply, or the final receipt hash differs from the reviewed hash.
-2. Reset the sample and complete a second rehearsal at ordinary interaction
-   speed. The captured sequence must finish between 2:35 and 2:43 before the
-   narration overlays.
+2. Reset the sample and complete a second rehearsal in short clips. Preserve
+   every real tool result and human control, but cut loading and dead air. The
+   edited sequence must finish between 2:30 and 2:40 with narration.
 3. Record the final take only after both rehearsals pass. Watch the exported
-   video once with sound, verify captions, then check the duration is at least
-   165 and under 180 seconds before uploading it publicly.
+   video once with sound, verify captions, then check the duration is between
+   150 and 165 seconds and strictly under 180 seconds before uploading it
+   publicly.
 4. Run the exported video's first 30 seconds through the blind comprehension
    protocol in `docs/RECORDING_VALIDATION.md`. Do not count the project owner or
    anyone who already knows the product.
 
 ## Narration count
 
-The narration above is **269 words** across a 2:48 target. Recount it after any
-recording edit; spoken pacing must remain natural and the result must still be
-visible by second 28.
+The narration above is **193 words** across a 2:40 target. Recount it after any
+recording edit; spoken pacing must remain natural, the first WebMCP calls must
+begin at second zero, and the audit result must be visible by second eight.

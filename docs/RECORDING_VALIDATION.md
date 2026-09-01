@@ -13,9 +13,9 @@ explain it first. Ask each person, in this order:
 4. What remains under human control?
 
 Record answers verbatim. Pass only when at least two of three people correctly
-identify all four ideas: an applicant near a consequential deadline; stale or
-missing application claims; the agent used webpage-provided tools to audit the
-live draft; and the person controls facts, changes, and submission.
+identify all four ideas: a high-stakes applicant; stale or missing application
+claims; the agent used webpage-provided tools to audit the live draft and stage
+a preview; and the person controls facts, changes, and submission.
 
 | Reviewer | Unfamiliar with project | User | Pain | Agent action | Human control | Pass |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -29,12 +29,20 @@ external-user validation.
 
 ## Export checks
 
-- Duration is at least 165 seconds and strictly under 180 seconds.
-- **For high-stakes applicants**, `3/10 ready`, and `7 blockers remain` are
-  readable in the first nine seconds.
-- The live audit result is visible again by second 28.
+- Duration is between 150 and 165 seconds and strictly under 180 seconds.
+- The video starts on the working application with no title card, setup, login,
+  loading screen, personal-origin introduction, or reset cut.
+- `get_application_context` and `audit_application` begin at second zero;
+  **For high-stakes applicants**, `3/10 ready`, `7 blockers remain`, and
+  **0 fields changed** are readable by second eight.
+- `stage_draft_patch` begins by second 24, and its non-mutating `3/10 → 7/10`
+  preview plus the native Apply boundary are legible within the first 30
+  seconds.
 - Captions match the spoken words and do not cover tool results or controls.
 - Tool invocations, native Apply, native authorization, receipt metrics, and
   reviewed hash are legible at normal playback speed.
+- Tool latency, loading, live typing, pauses, repeated features, and repository
+  browsing are cut; consequential review and authorization remain unsped and
+  legible.
 - The video contains no credentials, private tabs, notifications, or invented
   user-validation claims.
