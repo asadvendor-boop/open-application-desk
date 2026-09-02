@@ -38,9 +38,10 @@ deadline. Status: **SKIPPED — no external-user-validation claim will be made.*
 
 ## Export checks
 
-- Duration is between 150 and 165 seconds and strictly under 180 seconds.
+- Duration is between 145 and 155 seconds and strictly under 180 seconds.
 - The video starts on the working application with no title card, setup, login,
-  API-key entry, loading screen, personal-origin introduction, or reset cut.
+  API-key entry, loading screen, separate personal-origin sequence, or reset
+  cut.
 - The agent side panel visibly shows OpenAI invoking registered WebMCP tools;
   the recording does not substitute manual tool execution for the agent flow.
 - `get_application_context` and `audit_application` begin at second zero;
@@ -49,9 +50,9 @@ deadline. Status: **SKIPPED — no external-user-validation claim will be made.*
 - The first narration sentence establishes the real deadline and stale-claim
   pain while the WebMCP tools are already running; there is no separate origin
   or inspiration segment.
-- `stage_draft_patch` begins by second 25, and its non-mutating `3/10 → 7/10`
-  preview plus the native Apply boundary are legible within the first 30
-  seconds.
+- `stage_draft_patch` begins by second 20. Its non-mutating `3/10 → 7/10`
+  preview and human-only Apply boundary are legible by second 30; native Apply
+  happens immediately afterward at normal speed.
 - Captions match the spoken words and do not cover tool results or controls.
 - Tool invocations, native Apply, native authorization, receipt metrics, and
   reviewed hash are legible at normal playback speed.
@@ -60,7 +61,6 @@ deadline. Status: **SKIPPED — no external-user-validation claim will be made.*
   legible.
 - The video contains no credentials, private tabs, notifications, or invented
   user-validation claims.
-- The closing host statement is precise: manual mode works everywhere; agent
-  collaboration uses the supported ChatGPT desktop Work/Codex host or the
-  optional OpenAI Chrome developer extension. It does not imply that ordinary
-  chatgpt.com currently hosts these page tools.
+- The closing statement returns to the receipt and clearly says the applicant
+  owns facts, changes, and final submission. Host compatibility belongs in the
+  Devpost instructions rather than the closing ten seconds of the video.

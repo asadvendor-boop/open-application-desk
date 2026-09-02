@@ -1,8 +1,10 @@
 # Native Chrome recording runbook
 
 Use this runbook only with the final production URL and the optional open-source
-OpenAI WebMCP Tool Inspector. It is designed to produce the live journey in
+OpenAI WebMCP Tool Inspector. It produces the live journey in
 `docs/DEMO_SCRIPT.md` without showing setup, credentials, or live typing.
+Record six short clips, then assemble them in the listed order; the story must
+still feel like one continuous journey.
 
 ## One-time preflight — do not record
 
@@ -98,6 +100,28 @@ Submit only the exact review I just authorized, using its matching review ID and
 Required visible result: one submission receipt bound to the reviewed hash,
 showing seven blockers caught and zero remaining.
 
+## Clip assembly order
+
+Keep every shown tool result real, but remove prompt typing, waiting, and dead
+air. Do not hide any human authority boundary.
+
+1. **0:00–0:08 — pain and proof:** show the first audit already running, then
+   land on `3/10`, seven blockers, and zero changed fields.
+2. **0:08–0:20 — promise:** hold the unchanged draft, show
+   `stage_draft_patch`, and add the spoken boundary: the agent prepares, but
+   cannot invent facts, apply, or submit another revision.
+3. **0:20–0:38 — preview:** show `3/10 → 7/10`, **Preview only**, and native
+   **Apply proposed changes** at normal speed.
+4. **0:38–1:00 — applicant fact:** show `request_applicant_fact` appearing,
+   the agent's question, native **Share answer with agent**, then the tool no
+   longer listed.
+5. **1:00–1:45 — readiness and authorization:** show evidence plus
+   attestation, `10/10`, the exact hash, and native authorization before the
+   bound submission call.
+6. **1:45–2:32 — receipt, proof, close:** hold the receipt metrics, briefly
+   show five core registrations and one closed-schema excerpt, then return to
+   the receipt for the final applicant-control statement.
+
 ## Stop conditions
 
 Stop and reset before recording again if any of these occur:
@@ -110,4 +134,5 @@ Stop and reset before recording again if any of these occur:
 - Final audit is not 10/10 with zero blockers.
 - The receipt hash differs from the authorized review hash.
 - Any credential, setting screen, notification, or private tab enters frame.
-
+- The final edit contains a host-compatibility explanation instead of the
+  applicant-control conclusion in `docs/DEMO_SCRIPT.md`.
