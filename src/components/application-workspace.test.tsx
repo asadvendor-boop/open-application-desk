@@ -5,6 +5,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { createWorkspace, applyPatch, stagePatch } from "@/domain/application/workspace";
 import type { WorkspaceState } from "@/domain/application/types";
+import { createSampleDraft } from "@/domain/application/sample-program";
 import { createValidDraft, verifiedRepository } from "@/test/fixtures";
 import { saveWorkspace } from "@/storage/local-workspace";
 import { ApplicationWorkspace } from "./application-workspace";
@@ -23,7 +24,7 @@ function installSubmissionLock() {
   });
 }
 
-function installModelContext() {
+function installModelContext(lifecycleEvents?: string[]) {
   const tools = new Map<string, WebMCP.ModelContextTool>();
   Object.defineProperty(document, "modelContext", {
     configurable: true,
@@ -33,6 +34,7 @@ function installModelContext() {
         options?.signal?.addEventListener(
           "abort",
           () => {
+            lifecycleEvents?.push(`unregistered:${tool.name}`);
             if (tools.get(tool.name) === tool) {
               tools.delete(tool.name);
             }
@@ -181,5 +183,50 @@ describe("application workspace", () => {
     expect(
       await screen.findByText("Draft r3 passed all 10 deterministic checks."),
     ).toBeInTheDocument();
+  });
+
+  it("delivers the human answer before unregistering the contextual tool", async () => {
+    const lifecycleEvents: string[] = [];
+    const tools = installModelContext(lifecycleEvents);
+    saveWorkspace(createWorkspace(createSampleDraft()));
+    const user = userEvent.setup();
+
+    render(<ApplicationWorkspace />);
+    await waitFor(() =>
+      expect(tools.get("request_applicant_fact")).toBeDefined(),
+    );
+    const applicantFactTool = tools.get("request_applicant_fact");
+    if (!applicantFactTool) {
+      throw new Error("Expected request_applicant_fact to register.");
+    }
+
+    const pendingAnswer = Promise.resolve(
+      applicantFactTool.execute(
+        { field: "audienceProblem" },
+        { signal: new AbortController().signal },
+      ),
+    ).then((result: unknown) => {
+      lifecycleEvents.push("answer-delivered");
+      return result;
+    });
+
+    await user.type(
+      await screen.findByLabelText("Your answer"),
+      "Applicants need one truthful shared draft.",
+    );
+    await user.click(
+      screen.getByRole("button", { name: "Share answer with agent" }),
+    );
+
+    await expect(pendingAnswer).resolves.toMatchObject({
+      outcome: "answered",
+      source: "human",
+    });
+    await waitFor(() =>
+      expect(tools.has("request_applicant_fact")).toBe(false),
+    );
+    expect(lifecycleEvents.indexOf("answer-delivered")).toBeLessThan(
+      lifecycleEvents.indexOf("unregistered:request_applicant_fact"),
+    );
   });
 });

@@ -38,7 +38,7 @@ export function ApplicationWorkspace() {
   const webMcpConnection = useWebMcpTools(
     controller,
     onWebMcpAuditCompleted,
-    !workspace.draft.fields.audienceProblem.trim(),
+    Boolean(pendingApplicantFact) || !workspace.draft.fields.audienceProblem.trim(),
   );
 
   async function runAudit() {

@@ -161,10 +161,18 @@ export function useApplicationWorkspace(): {
         return;
       }
       pendingApplicantFactRef.current = null;
-      if (mountedRef.current) {
-        setPendingApplicantFact(null);
-      }
       pending.resolve(result);
+      if (mountedRef.current) {
+        if (result.outcome === "answered") {
+          setTimeout(() => {
+            if (mountedRef.current && !pendingApplicantFactRef.current) {
+              setPendingApplicantFact(null);
+            }
+          }, 0);
+        } else {
+          setPendingApplicantFact(null);
+        }
+      }
     },
     [],
   );
