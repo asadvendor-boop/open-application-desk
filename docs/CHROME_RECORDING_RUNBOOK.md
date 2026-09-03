@@ -108,8 +108,10 @@ air. Do not hide any human authority boundary.
 1. **0:00–0:08 — pain and proof:** show the first audit already running, then
    land on `3/10`, seven blockers, and zero changed fields.
 2. **0:08–0:20 — promise:** hold the unchanged draft, show
-   `stage_draft_patch`, and add the spoken boundary: the agent prepares, but
-   cannot invent facts, apply, or submit another revision.
+   `stage_draft_patch`, and say: “The OpenAI API supplies the reasoning; WebMCP
+   lets this page publish its live tools, state, and boundaries.” Then state
+   the authority boundary: “The agent prepares, but cannot invent facts, apply
+   changes, or submit another revision.”
 3. **0:20–0:38 — preview:** show `3/10 → 7/10`, **Preview only**, and native
    **Apply proposed changes** at normal speed.
 4. **0:38–1:00 — applicant fact:** show `request_applicant_fact` appearing,

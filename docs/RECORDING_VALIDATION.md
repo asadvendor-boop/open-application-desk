@@ -50,6 +50,9 @@ deadline. Status: **SKIPPED — no external-user-validation claim will be made.*
 - The first narration sentence establishes the real deadline and stale-claim
   pain while the WebMCP tools are already running; there is no separate origin
   or inspiration segment.
+- By second 20, the narration distinguishes the roles precisely: **the OpenAI
+  API supplies the reasoning; WebMCP lets the page publish its live tools,
+  state, and boundaries**.
 - `stage_draft_patch` begins by second 20. Its non-mutating `3/10 → 7/10`
   preview and human-only Apply boundary are legible by second 30; native Apply
   happens immediately afterward at normal speed.

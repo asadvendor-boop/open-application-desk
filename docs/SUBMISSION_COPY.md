@@ -30,6 +30,9 @@ or unintended submission can cost an opportunity.
 
 ### Why WebMCP is the right fit
 
+The OpenAI API supplies the reasoning; WebMCP lets this page publish its live
+tools, state, and boundaries.
+
 WebMCP exposes the smallest useful set of structured actions from the actual
 page. Instead of asking an agent to interpret arbitrary UI text and imitate
 clicks, the portal gives it five core tools: read the current context, run a

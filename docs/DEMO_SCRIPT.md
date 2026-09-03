@@ -20,7 +20,7 @@ ChatGPT extension.
 | Time | Screen proof | Narration |
 | --- | --- | --- |
 | 0:00–0:08 | Start already on the fresh sample with **For high-stakes applicants**, **WebMCP connected**, and the OpenAI agent side panel visible. Show `get_application_context` and `audit_application`; jump-cut latency. Land on `3/10 ready`, `7 blockers remain`, and **0 fields changed** by 0:08. | While racing a real application deadline, a stale claim nearly survived into my submission. This agent is already auditing the exact live draft: three of ten ready, seven blockers, and zero fields changed. |
-| 0:08–0:20 | Hold on the blockers and unchanged revision, then show the agent call `stage_draft_patch`. Use a compact overlay: **The agent prepares; the applicant decides**. Do not type the prompt live. | Open Application Desk gives the agent typed WebMCP tools, not pixels to scrape. It can prepare work, but it cannot invent applicant facts, apply a patch, or submit a different revision. |
+| 0:08–0:20 | Hold on the blockers and unchanged revision, then show the agent call `stage_draft_patch`. Use a compact overlay: **The agent prepares; the applicant decides**. Do not type the prompt live. | The OpenAI API supplies the reasoning; WebMCP lets this page publish its live tools, state, and boundaries. The agent prepares, but cannot invent facts, apply changes, or submit another revision. |
 | 0:20–0:38 | Show **Preview only — not applied**, the compact `3/10 → 7/10` projection, and the three old/new values. Add a brief **Human applies** overlay, then use native **Apply proposed changes** at normal speed. | It stages three bounded fixes and evaluates them without touching my application: three to seven ready. The difference is visible, but the original draft changes only when I use the page's Apply control. |
 | 0:38–1:00 | Show `request_applicant_fact` appear because the audience fact is blank. Call it, hold on the page-owned question and waiting state, then answer through native **Share answer with agent**. Show the tool list again after it disappears. | One blocker is a fact only I can truthfully provide. The page exposes one contextual tool. The agent asks; I answer through the native form. Once answered, that tool disappears. |
 | 1:00–1:18 | Add public evidence, check attestation, and call `audit_application` again. Jump-cut latency and hold on `10/10 ready` with `0 blockers remain`. | I add public evidence and attest to the claim. A fresh deterministic audit now reaches ten of ten, with zero blockers. |
@@ -47,7 +47,7 @@ ChatGPT extension.
 
 ## Narration count
 
-The narration above is approximately **243 words** across a 2:32 target. Recount
+The narration above is approximately **242 words** across a 2:32 target. Recount
 it after any recording edit; spoken pacing must remain natural, the first
 WebMCP calls must begin at second zero, and the audit result must be visible by
 second eight.

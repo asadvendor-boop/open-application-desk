@@ -65,6 +65,9 @@ not claims about time saved, acceptance odds, or external adoption.
 
 ## Why WebMCP
 
+**The OpenAI API supplies the reasoning; WebMCP lets this page publish its live
+tools, state, and boundaries.**
+
 An ordinary agent must scrape UI text and imitate clicks. That makes it hard to
 know which draft it inspected, whether a change was applied, or whether the
 person authorized the same state that was submitted. WebMCP lets the portal
