@@ -111,11 +111,15 @@ test("completes the human-controlled WebMCP journey from blockers to receipt", a
   await page.getByRole("button", { name: "Apply proposed changes" }).click();
   await expect(page.getByLabel("Project summary")).not.toHaveValue(originalSummary);
 
-  const applicantFact = executeWebMcpTool<{
+  const applicantFact = await executeWebMcpTool<{
     outcome: string;
-    source?: string;
+    field?: string;
     draftRevision?: number;
   }>(page, "request_applicant_fact", { field: "audienceProblem" });
+  expect(applicantFact).toMatchObject({
+    outcome: "awaiting_human",
+    field: "audienceProblem",
+  });
   await expect(
     page.getByRole("heading", { name: "A fact only you can supply" }),
   ).toBeVisible();
@@ -123,10 +127,9 @@ test("completes the human-controlled WebMCP journey from blockers to receipt", a
     "Applicants under deadline pressure risk rejection when requirements, claims, and public evidence drift across disconnected tabs.",
   );
   await page.getByRole("button", { name: "Share answer with agent" }).click();
-  await expect(applicantFact).resolves.toMatchObject({
-    outcome: "answered",
-    source: "human",
-  });
+  await expect(
+    page.getByRole("heading", { name: "A fact only you can supply" }),
+  ).toBeHidden();
   await page.getByLabel("Evidence type").selectOption("live_demo");
   await page
     .getByLabel("Claim", { exact: true })
@@ -246,14 +249,20 @@ test("reconciles concurrent submissions from two Chromium tabs to one receipt", 
   await page.getByLabel("Project summary").fill(
     "A concise WebMCP application workspace where people retain review and submission authority.",
   );
-  const applicantFact = executeWebMcpTool(page, "request_applicant_fact", {
+  const applicantFact = await executeWebMcpTool<{
+    outcome: string;
+    field?: string;
+  }>(page, "request_applicant_fact", {
+    field: "audienceProblem",
+  });
+  expect(applicantFact).toMatchObject({
+    outcome: "awaiting_human",
     field: "audienceProblem",
   });
   await page.getByLabel("Your answer").fill(
     "Applicants need one reliable place to keep requirements, public evidence, and submission authority aligned.",
   );
   await page.getByRole("button", { name: "Share answer with agent" }).click();
-  await applicantFact;
   await page
     .getByLabel("Live URL")
     .fill("https://example.com/open-application-desk");

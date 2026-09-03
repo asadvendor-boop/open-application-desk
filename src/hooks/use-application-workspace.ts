@@ -57,20 +57,18 @@ export interface ApplicantFactRequest {
 
 export type ApplicantFactResult =
   | {
-      outcome: "answered";
+      outcome: "awaiting_human";
+      requestId: string;
       field: "audienceProblem";
-      source: "human";
-      value: string;
       draftRevision: number;
+      question: string;
     }
   | {
-      outcome: "cancelled" | "already_pending" | "not_needed";
+      outcome: "not_needed";
       field: "audienceProblem";
     };
 
-interface PendingApplicantFact extends ApplicantFactRequest {
-  resolve: (result: ApplicantFactResult) => void;
-}
+type PendingApplicantFact = ApplicantFactRequest;
 
 export interface WorkspaceController {
   getState(): WorkspaceState;
@@ -154,36 +152,20 @@ export function useApplicationWorkspace(): {
     useState<ApplicantFactRequest | null>(null);
   const mountedRef = useRef(true);
 
-  const settlePendingApplicantFact = useCallback(
-    (result: ApplicantFactResult) => {
-      const pending = pendingApplicantFactRef.current;
-      if (!pending) {
-        return;
-      }
-      pendingApplicantFactRef.current = null;
-      pending.resolve(result);
-      if (mountedRef.current) {
-        if (result.outcome === "answered") {
-          setTimeout(() => {
-            if (mountedRef.current && !pendingApplicantFactRef.current) {
-              setPendingApplicantFact(null);
-            }
-          }, 0);
-        } else {
-          setPendingApplicantFact(null);
-        }
-      }
-    },
-    [],
-  );
+  const clearPendingApplicantFact = useCallback(() => {
+    pendingApplicantFactRef.current = null;
+    if (mountedRef.current) {
+      setPendingApplicantFact(null);
+    }
+  }, []);
 
   useEffect(() => {
     mountedRef.current = true;
     return () => {
       mountedRef.current = false;
-      settlePendingApplicantFact({ outcome: "cancelled", field: "audienceProblem" });
+      pendingApplicantFactRef.current = null;
     };
-  }, [settlePendingApplicantFact]);
+  }, []);
 
   const commit = useCallback(
     (next: WorkspaceState, requirePersistence = false): boolean => {
@@ -305,26 +287,29 @@ export function useApplicationWorkspace(): {
           return { outcome: "not_needed", field: "audienceProblem" };
         }
         if (pendingApplicantFactRef.current) {
-          return { outcome: "already_pending", field: "audienceProblem" };
-        }
-        return new Promise<ApplicantFactResult>((resolve) => {
-          const request: ApplicantFactRequest = {
-            id: makeId("applicant-fact"),
-            field: "audienceProblem",
-            question: APPLICANT_FACT_QUESTION,
+          const request = pendingApplicantFactRef.current;
+          return {
+            outcome: "awaiting_human",
+            requestId: request.id,
+            field: request.field,
+            question: request.question,
+            draftRevision: workspaceRef.current.draft.revision,
           };
-          pendingApplicantFactRef.current = { ...request, resolve };
-          setPendingApplicantFact(request);
-          signal?.addEventListener(
-            "abort",
-            () =>
-              settlePendingApplicantFact({
-                outcome: "cancelled",
-                field: "audienceProblem",
-              }),
-            { once: true },
-          );
-        });
+        }
+        const request: ApplicantFactRequest = {
+          id: makeId("applicant-fact"),
+          field: "audienceProblem",
+          question: APPLICANT_FACT_QUESTION,
+        };
+        pendingApplicantFactRef.current = request;
+        setPendingApplicantFact(request);
+        return {
+          outcome: "awaiting_human",
+          requestId: request.id,
+          field: request.field,
+          question: request.question,
+          draftRevision: workspaceRef.current.draft.revision,
+        };
       },
       answerApplicantFact(value) {
         const pending = pendingApplicantFactRef.current;
@@ -339,19 +324,10 @@ export function useApplicationWorkspace(): {
           nowIso(),
         );
         commit(next);
-        settlePendingApplicantFact({
-          outcome: "answered",
-          field: "audienceProblem",
-          source: "human",
-          value: answer,
-          draftRevision: next.draft.revision,
-        });
+        clearPendingApplicantFact();
       },
       cancelApplicantFact() {
-        settlePendingApplicantFact({
-          outcome: "cancelled",
-          field: "audienceProblem",
-        });
+        clearPendingApplicantFact();
       },
       applyPatch(patchId) {
         commit(applyWorkspacePatch(workspaceRef.current, patchId, nowIso()));
@@ -428,16 +404,13 @@ export function useApplicationWorkspace(): {
         });
       },
       reset() {
-        settlePendingApplicantFact({
-          outcome: "cancelled",
-          field: "audienceProblem",
-        });
+        clearPendingApplicantFact();
         clearWorkspace();
         const next = createWorkspace(createSampleDraft(nowIso()));
         commit(next);
       },
     };
-  }, [commit, settlePendingApplicantFact]);
+  }, [clearPendingApplicantFact, commit]);
 
   return { workspace, controller, persistence, pendingApplicantFact };
 }

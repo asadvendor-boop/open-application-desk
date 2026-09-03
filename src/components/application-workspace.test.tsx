@@ -185,9 +185,8 @@ describe("application workspace", () => {
     ).toBeInTheDocument();
   });
 
-  it("delivers the human answer before unregistering the contextual tool", async () => {
-    const lifecycleEvents: string[] = [];
-    const tools = installModelContext(lifecycleEvents);
+  it("returns an immediate applicant handoff and unregisters the contextual tool after the human answer", async () => {
+    const tools = installModelContext();
     saveWorkspace(createWorkspace(createSampleDraft()));
     const user = userEvent.setup();
 
@@ -200,15 +199,14 @@ describe("application workspace", () => {
       throw new Error("Expected request_applicant_fact to register.");
     }
 
-    const pendingAnswer = Promise.resolve(
-      applicantFactTool.execute(
-        { field: "audienceProblem" },
-        { signal: new AbortController().signal },
-      ),
-    ).then((result: unknown) => {
-      lifecycleEvents.push("answer-delivered");
-      return result;
+    await expect(applicantFactTool.execute(
+      { field: "audienceProblem" },
+      { signal: new AbortController().signal },
+    )).resolves.toMatchObject({
+      outcome: "awaiting_human",
+      field: "audienceProblem",
     });
+    expect(await screen.findByText("A fact only you can supply")).toBeInTheDocument();
 
     await user.type(
       await screen.findByLabelText("Your answer"),
@@ -218,15 +216,8 @@ describe("application workspace", () => {
       screen.getByRole("button", { name: "Share answer with agent" }),
     );
 
-    await expect(pendingAnswer).resolves.toMatchObject({
-      outcome: "answered",
-      source: "human",
-    });
     await waitFor(() =>
       expect(tools.has("request_applicant_fact")).toBe(false),
-    );
-    expect(lifecycleEvents.indexOf("answer-delivered")).toBeLessThan(
-      lifecycleEvents.indexOf("unregistered:request_applicant_fact"),
     );
   });
 });

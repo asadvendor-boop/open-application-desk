@@ -28,7 +28,6 @@ import {
   upsertEvidence,
 } from "@/domain/application/workspace";
 import type {
-  ApplicantFactResult,
   WorkspaceController,
 } from "@/hooks/use-application-workspace";
 
@@ -97,9 +96,7 @@ export function createWorkspaceControllerHarness(
 ): WorkspaceControllerHarness {
   let state = createWorkspace(initialDraft);
   let sequence = 0;
-  let pendingApplicantFact:
-    | { resolve: (result: ApplicantFactResult) => void }
-    | null = null;
+  let pendingApplicantFact = false;
 
   const nextNow = () =>
     new Date(Date.parse("2026-08-27T01:00:00.000Z") + sequence++ * 1_000)
@@ -156,32 +153,33 @@ export function createWorkspaceControllerHarness(
         return { outcome: "not_needed", field: "audienceProblem" } as const;
       }
       if (pendingApplicantFact) {
-        return { outcome: "already_pending", field: "audienceProblem" } as const;
+        return {
+          outcome: "awaiting_human",
+          requestId: "applicant-fact-pending",
+          field: "audienceProblem",
+          question: "Who is this application for, and what specific difficulty do they face?",
+          draftRevision: state.draft.revision,
+        } as const;
       }
-      return new Promise((resolve) => {
-        pendingApplicantFact = { resolve };
-      });
+      pendingApplicantFact = true;
+      return {
+        outcome: "awaiting_human",
+        requestId: "applicant-fact-pending",
+        field: "audienceProblem",
+        question: "Who is this application for, and what specific difficulty do they face?",
+        draftRevision: state.draft.revision,
+      } as const;
     },
     answerApplicantFact(value) {
       const answer = value.trim();
       if (!pendingApplicantFact || !answer) {
         throw new Error("A non-empty answer is required for the active applicant request.");
       }
-      const pending = pendingApplicantFact;
-      pendingApplicantFact = null;
+      pendingApplicantFact = false;
       commit(editDraftField(state, "audienceProblem", answer, nextNow()));
-      pending.resolve({
-        outcome: "answered",
-        field: "audienceProblem",
-        source: "human",
-        value: answer,
-        draftRevision: state.draft.revision,
-      });
     },
     cancelApplicantFact() {
-      const pending = pendingApplicantFact;
-      pendingApplicantFact = null;
-      pending?.resolve({ outcome: "cancelled", field: "audienceProblem" });
+      pendingApplicantFact = false;
     },
     applyPatch(patchId: string) {
       commit(applyPatch(state, patchId, nextNow()));
@@ -230,9 +228,7 @@ export function createWorkspaceControllerHarness(
       };
     },
     reset() {
-      const pending = pendingApplicantFact;
-      pendingApplicantFact = null;
-      pending?.resolve({ outcome: "cancelled", field: "audienceProblem" });
+      pendingApplicantFact = false;
       state = createWorkspace(initialDraft);
     },
   };

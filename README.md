@@ -28,8 +28,9 @@ clicks. The page itself publishes a typed collaboration surface through WebMCP.
 4. Ask it to stage a concise patch. The page shows the exact diff; the draft does
    not change until the person uses **Apply proposed changes**.
 5. Ask the agent to request the missing audience fact. The page—not the agent—
-   asks its fixed question and waits for the applicant's native response. Add
-   evidence and attestation, then ask the agent to audit and prepare an exact review.
+   asks its fixed question and immediately returns an `awaiting_human` handoff.
+   Add the native response, evidence, and attestation, then ask the agent to
+   re-read the live draft, audit, and prepare an exact review.
 6. Use the native **Authorize exact application** control, then ask the agent to
    submit the matching review ID and draft hash. The application records one
    receipt bound to that reviewed hash, including the measured journey from the
@@ -90,8 +91,9 @@ transitions. There is no hidden agent workflow and no embedded LLM.
 When `audienceProblem` is blank, the page additionally and temporarily exposes
 `request_applicant_fact({ field: "audienceProblem" })`. It has no free-form
 question parameter and cannot write a draft field itself: it opens the page's
-fixed native question, waits, and returns only an answer the applicant chose to
-share. Once answered, that contextual tool disappears.
+fixed native question and immediately returns an `awaiting_human` handoff. The
+agent then re-reads the live page after the applicant chooses to share an
+answer. Once answered, that contextual tool disappears.
 
 The tool definitions are in
 [`src/webmcp/tool-executors.ts`](src/webmcp/tool-executors.ts); registration and

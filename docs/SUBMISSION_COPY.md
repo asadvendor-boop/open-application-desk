@@ -109,9 +109,11 @@ The project registers five core imperative WebMCP tools through
 JSON Schema (`additionalProperties: false`) and runtime Zod validation. Tool
 registration uses an `AbortSignal` lifecycle; execution respects cancellation.
 One contextual `request_applicant_fact` registration appears only while its
-fixed audience fact is missing. The audit engine is deterministic and
-tool-proposed edits stay visibly staged until a person applies them. The
-hash-bound receipt uses a browser-provided exclusive lock, so repeated
+fixed audience fact is missing. It opens the page-owned question and returns an
+immediate `awaiting_human` handoff, so the agent re-reads the live state after
+the applicant answers instead of holding an open call. The audit engine is
+deterministic and tool-proposed edits stay visibly staged until a person applies
+them. The hash-bound receipt uses a browser-provided exclusive lock, so repeated
 submissions of the same authorized review reconcile to one receipt across open
 tabs; a browser without that lock fails closed.
 

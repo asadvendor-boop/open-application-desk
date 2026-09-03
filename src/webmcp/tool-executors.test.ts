@@ -35,25 +35,25 @@ async function executeWithoutBrowserContext(
 }
 
 describe("WebMCP tool executors", () => {
-  it("waits for the applicant-owned fact and returns only the human response", async () => {
+  it("opens the applicant-owned handoff and returns immediately", async () => {
     const controller = createWorkspaceControllerHarness(createValidDraft());
     controller.editField("audienceProblem", "");
     const tool = createApplicantFactToolDefinition(controller);
 
-    const pending = tool.execute(
+    await expect(tool.execute(
       { field: "audienceProblem" },
       { signal: liveSignal() },
-    );
+    )).resolves.toMatchObject({
+      outcome: "awaiting_human",
+      field: "audienceProblem",
+      question: "Who is this application for, and what specific difficulty do they face?",
+    });
+
+    expect(controller.getState().draft.fields.audienceProblem).toBe("");
     controller.answerApplicantFact(
       "Independent applicants need one truthful view of requirements and evidence.",
     );
 
-    await expect(pending).resolves.toMatchObject({
-      outcome: "answered",
-      field: "audienceProblem",
-      source: "human",
-      draftRevision: 5,
-    });
     expect(controller.getState().draft.fields.audienceProblem).toContain(
       "Independent applicants",
     );

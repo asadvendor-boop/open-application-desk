@@ -62,14 +62,15 @@ The application still lacks the applicant-owned audience-and-problem fact. Use t
 ```
 
 Required visible result: `request_applicant_fact` invokes the page-owned
-question and waits. In the native page, enter:
+question and immediately returns `awaiting_human`; it does not keep a tool call
+open while a person responds. In the native page, enter:
 
 ```text
 Applicants under deadline pressure risk rejection when requirements, claims, and public evidence drift across disconnected tabs.
 ```
 
 Use native **Share answer with agent**. The contextual tool must disappear after
-the answer is accepted.
+the answer is accepted. The next agent call re-reads the updated page state.
 
 ### Human-only evidence and attestation
 
@@ -115,8 +116,8 @@ air. Do not hide any human authority boundary.
 3. **0:20–0:38 — preview:** show `3/10 → 7/10`, **Preview only**, and native
    **Apply proposed changes** at normal speed.
 4. **0:38–1:00 — applicant fact:** show `request_applicant_fact` appearing,
-   the agent's question, native **Share answer with agent**, then the tool no
-   longer listed.
+   its immediate `awaiting_human` handoff, the page-owned question, native
+   **Share answer with agent**, then the tool no longer listed.
 5. **1:00–1:45 — readiness and authorization:** show evidence plus
    attestation, `10/10`, the exact hash, and native authorization before the
    bound submission call.

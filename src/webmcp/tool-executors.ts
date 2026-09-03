@@ -269,7 +269,7 @@ export function createApplicantFactToolDefinition(
     name: "request_applicant_fact",
     title: "Request an applicant-owned fact",
     description:
-      "Ask the page to collect the missing audience-and-problem fact from the applicant. The page owns the exact question and the applicant decides whether to share the answer. This tool cannot write any other field or apply a proposal.",
+      "Ask the page to collect the missing audience-and-problem fact from the applicant. This returns immediately with an awaiting_human handoff; after the applicant answers through the page, read the current application context again. This tool cannot write any field or apply a proposal.",
     inputSchema: toolInputSchemas.request_applicant_fact,
     annotations: { readOnlyHint: false, untrustedContentHint: true },
     async execute(input, execution?) {

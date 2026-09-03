@@ -124,24 +124,21 @@ describe("useApplicationWorkspace concurrency", () => {
     expect(result.current.workspace.draft.fields.repositoryUrl).toBe("");
   });
 
-  it("cancels a waiting applicant-fact request when the sample is reset", async () => {
+  it("clears a visible applicant-fact handoff when the sample is reset", async () => {
     saveWorkspace(createWorkspace(createSampleDraft()));
     const { result } = renderHook(() => useApplicationWorkspace());
 
-    let pending!: ReturnType<typeof result.current.controller.requestApplicantFact>;
+    let request!: ReturnType<typeof result.current.controller.requestApplicantFact>;
     act(() => {
-      pending = result.current.controller.requestApplicantFact("audienceProblem");
+      request = result.current.controller.requestApplicantFact("audienceProblem");
     });
+    await expect(request).resolves.toMatchObject({ outcome: "awaiting_human" });
     expect(result.current.pendingApplicantFact?.field).toBe("audienceProblem");
 
     act(() => {
       result.current.controller.reset();
     });
 
-    await expect(pending).resolves.toEqual({
-      outcome: "cancelled",
-      field: "audienceProblem",
-    });
     expect(result.current.pendingApplicantFact).toBeNull();
   });
 

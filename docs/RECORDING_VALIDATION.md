@@ -56,6 +56,9 @@ deadline. Status: **SKIPPED — no external-user-validation claim will be made.*
 - `stage_draft_patch` begins by second 20. Its non-mutating `3/10 → 7/10`
   preview and human-only Apply boundary are legible by second 30; native Apply
   happens immediately afterward at normal speed.
+- The contextual fact call visibly returns `awaiting_human`, the person answers
+  through the page, and the agent's next call re-reads the updated live state;
+  no tool call is presented as waiting for a human response.
 - Captions match the spoken words and do not cover tool results or controls.
 - Tool invocations, native Apply, native authorization, receipt metrics, and
   reviewed hash are legible at normal playback speed.
